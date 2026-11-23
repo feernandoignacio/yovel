@@ -1,6 +1,6 @@
 import { createContext, ReactNode, useContext, useEffect, useState } from 'react'
 import { AppData, Bill, BillDraft, Entry, GoalDraft } from '../types'
-import { createSampleData } from './sample'
+import { createEmptyData } from './sample'
 import { addMonths, todayISO } from '../utils/date'
 import { createId } from '../utils/bills'
 
@@ -26,10 +26,10 @@ const DataContext = createContext<DataContextValue | null>(null)
 export function DataProvider({ children }: { children: ReactNode }): React.JSX.Element {
   const [data, setData] = useState<AppData | null>(null)
 
-  // Carrega o arquivo ao abrir o app. Se não existir, usa os dados fictícios
+  // Carrega o arquivo ao abrir o app. Na primeira vez começa limpo
   useEffect(() => {
     window.api.loadData().then((saved) => {
-      setData((saved as AppData | null) ?? createSampleData())
+      setData((saved as AppData | null) ?? createEmptyData())
     })
   }, [])
 

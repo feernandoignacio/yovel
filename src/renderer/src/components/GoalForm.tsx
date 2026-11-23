@@ -2,6 +2,7 @@ import { FormEvent, useState } from 'react'
 import { Goal, GoalDraft } from '../types'
 import { addMonths, todayISO } from '../utils/date'
 import { parseAmount } from '../utils/money'
+import { DatePicker } from './DatePicker'
 
 type Props = {
   goal?: Goal // quando vem preenchido, edita essa meta
@@ -75,15 +76,10 @@ export function GoalForm({ goal, initial, onSave, onClose }: Props): React.JSX.E
           </label>
         </div>
 
-        <label className="field">
+        <div className="field">
           <span>Prazo</span>
-          <input
-            className="input"
-            type="date"
-            value={deadline}
-            onChange={(e) => setDeadline(e.target.value)}
-          />
-        </label>
+          <DatePicker value={deadline} onChange={setDeadline} />
+        </div>
 
         <p className="field-hint">
           O que faltar é dividido pelos dias de trabalho até o prazo e entra na meta de objetivos da

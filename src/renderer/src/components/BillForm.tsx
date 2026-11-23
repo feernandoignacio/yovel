@@ -2,6 +2,8 @@ import { FormEvent, useState } from 'react'
 import { Bill, BillDraft } from '../types'
 import { todayISO } from '../utils/date'
 import { parseAmount } from '../utils/money'
+import { Select } from './Select'
+import { DatePicker } from './DatePicker'
 
 type Props = {
   bill?: Bill // quando vem preenchido, o formulário edita essa conta
@@ -81,25 +83,16 @@ export function BillForm({ bill, onSave, onClose }: Props): React.JSX.Element {
             />
           </label>
 
-          <label className="field">
+          <div className="field">
             <span>{kind === 'installments' ? 'Vencimento da 1ª parcela' : 'Vencimento'}</span>
-            <input
-              className="input"
-              type="date"
-              value={dueDate}
-              onChange={(e) => setDueDate(e.target.value)}
-            />
-          </label>
+            <DatePicker value={dueDate} onChange={setDueDate} />
+          </div>
         </div>
 
-        <label className="field">
+        <div className="field">
           <span>Categoria</span>
-          <select className="input" value={category} onChange={(e) => setCategory(e.target.value)}>
-            {billCategories.map((c) => (
-              <option key={c}>{c}</option>
-            ))}
-          </select>
-        </label>
+          <Select value={category} options={billCategories} onChange={setCategory} />
+        </div>
 
         <div className="field">
           <span>Tipo</span>

@@ -10,11 +10,11 @@ Get the latest Windows installer on the [Releases page](https://github.com/feern
 
 The app is not code signed, so Windows may show "Windows protected your PC" when you open the installer. Click **More info** and then **Run anyway**.
 
-On first launch the app opens with sample data so you can see how it works. To start using it with your own bills, go to **Ajustes** and click **Apagar tudo**.
+The app starts empty. To see how it works with sample data first, go to **Ajustes** and click **Carregar exemplo**.
 
 ## Features
 
-- **Today**: log income and expenses for each day. The daily target for obligations is the month's bills minus what was already left over on previous days, split across the remaining workdays (Monday to Saturday). If a day falls short, the difference is spread over the next days; if it goes over, the next targets drop. Goals have a separate target, so they never feel like an obligation
+- **Today**: log income and expenses for each day. The daily target for obligations is the month's bills minus what was already left over on previous days, split across the remaining workdays (Monday to Saturday). If a day falls short, the difference is spread over the next days; if it goes over, the next targets drop. Upcoming days show the same target, assuming each day until then hits it. Goals have a separate target, so they never feel like an obligation
 - **Bills up to date**: open bills sorted by due date, with a warning when a bill is due in the next 3 days
 - **Overdue**: bills move here automatically once the due date passes, with the total owed
 - **Goals**: personal goals with a deadline, showing how much to set aside per workday. Goals feed the separate goals target on the Today tab

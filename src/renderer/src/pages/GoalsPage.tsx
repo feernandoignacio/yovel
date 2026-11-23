@@ -6,6 +6,7 @@ import { billStatus } from '../utils/bills'
 import { addMonths, daysUntil, formatDate, todayISO } from '../utils/date'
 import { formatMoney, parseAmount, sum } from '../utils/money'
 import { orderForPayoff, payoffDates, PayoffStrategy, perWorkday } from '../utils/plan'
+import { DatePicker } from '../components/DatePicker'
 
 type FormState = { goal?: Goal; initial?: Partial<GoalDraft> } | null
 
@@ -168,16 +169,10 @@ export function GoalsPage(): React.JSX.Element {
               </div>
             </div>
 
-            <label className="field">
+            <div className="field">
               <span>Quitar tudo até</span>
-              <input
-                className="input"
-                type="date"
-                min={today}
-                value={payoffDeadline}
-                onChange={(e) => e.target.value && setPayoffDeadline(e.target.value)}
-              />
-            </label>
+              <DatePicker value={payoffDeadline} min={today} onChange={setPayoffDeadline} />
+            </div>
 
             <div className="payoff-summary">
               <p className="card-label">Separar por dia de trabalho</p>

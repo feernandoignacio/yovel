@@ -61,6 +61,14 @@ export function TodayPage(): React.JSX.Element {
         </div>
       </header>
 
+      {data.bills.length === 0 && data.entries.length === 0 && (
+        <div className="alert alert-warning">
+          Bem-vindo ao Yovel. Comece cadastrando suas contas em Contas em dia, para o app calcular a
+          sua meta do dia. Se quiser ver como funciona antes, carregue os dados de exemplo em
+          Ajustes.
+        </div>
+      )}
+
       {!plan.isWorkday && (
         <div className="alert alert-success">
           Dia de folga. Sem meta hoje, mas dá para lançar o que entrou e saiu.

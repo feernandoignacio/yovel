@@ -1,6 +1,7 @@
 import { FormEvent, useState } from 'react'
 import { Entry } from '../types'
 import { parseAmount } from '../utils/money'
+import { Select } from './Select'
 
 type Props = {
   date: string
@@ -64,11 +65,7 @@ export function EntryForm({ date, onAdd }: Props): React.JSX.Element {
         onChange={(e) => setAmount(e.target.value)}
       />
 
-      <select className="input" value={category} onChange={(e) => setCategory(e.target.value)}>
-        {categories[type].map((c) => (
-          <option key={c}>{c}</option>
-        ))}
-      </select>
+      <Select value={category} options={categories[type]} onChange={setCategory} />
 
       <input
         className="input input-grow"
