@@ -6,6 +6,7 @@ Yovel (Jubilee) comes from Leviticus 25: every fifty years debts were forgiven a
 
 ## Features
 
+- **Today**: log income and expenses for each day. The daily target for obligations is the month's bills minus what was already left over on previous days, split across the remaining workdays (Monday to Saturday). If a day falls short, the difference is spread over the next days; if it goes over, the next targets drop. Goals have a separate target, so they never feel like an obligation
 - **Bills up to date**: open bills sorted by due date, with a warning when a bill is due in the next 3 days
 - **Overdue**: bills move here automatically once the due date passes, with the total owed
 - **Recurring bills**: paying a fixed bill creates next month's one automatically
@@ -13,7 +14,6 @@ Yovel (Jubilee) comes from Leviticus 25: every fifty years debts were forgiven a
 
 ### Coming next
 
-- Daily view: income and expenses, daily target for obligations and a separate target for goals, recalculated in real time
 - Goals
 - Weekly and monthly reports with charts
 - Windows notifications for bills about to expire

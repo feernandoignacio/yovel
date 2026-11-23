@@ -383,3 +383,195 @@ button {
   color: var(--stone);
   letter-spacing: 0.05em;
 }
+
+/* Cores de saldo */
+.positive {
+  color: var(--green);
+}
+
+.negative {
+  color: var(--red);
+}
+
+/* Aba Hoje */
+.page-header-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  gap: 16px;
+}
+
+.day-nav {
+  display: flex;
+  gap: 8px;
+}
+
+.card-soft {
+  background: transparent;
+  border: 1px dashed var(--stone-light);
+}
+
+.progress {
+  height: 6px;
+  background: var(--sand-dark);
+  border-radius: 3px;
+  margin-top: 12px;
+  overflow: hidden;
+}
+
+.progress-bar {
+  height: 100%;
+  background: var(--mustard);
+  border-radius: 3px;
+  transition: width 0.4s;
+}
+
+.progress-bar.done {
+  background: var(--green);
+}
+
+.entry-form {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  align-items: center;
+  background: var(--offwhite);
+  border-radius: var(--radius);
+  padding: 14px;
+}
+
+.toggle {
+  display: flex;
+  background: var(--sand);
+  border-radius: 8px;
+  padding: 3px;
+}
+
+.toggle button {
+  border: none;
+  background: transparent;
+  padding: 7px 14px;
+  border-radius: 6px;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--stone);
+}
+
+.toggle button.active.income {
+  background: var(--green);
+  color: var(--offwhite);
+}
+
+.toggle button.active.expense {
+  background: var(--red);
+  color: var(--offwhite);
+}
+
+.input {
+  font-family: inherit;
+  font-size: 13px;
+  color: var(--charcoal);
+  background: #fff;
+  border: 1px solid var(--stone-light);
+  border-radius: 8px;
+  padding: 8px 12px;
+  outline: none;
+}
+
+.input:focus {
+  border-color: var(--charcoal);
+}
+
+.input-amount {
+  width: 130px;
+  font-weight: 600;
+}
+
+.input-grow {
+  flex: 1;
+  min-width: 160px;
+}
+
+.form-error {
+  width: 100%;
+  color: var(--red);
+  font-size: 12px;
+}
+
+.entry-row {
+  display: grid;
+  grid-template-columns: 80px 1fr 140px 90px;
+  align-items: center;
+  gap: 16px;
+  background: var(--offwhite);
+  border-radius: var(--radius);
+  padding: 12px 18px;
+}
+
+.entry-type {
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.entry-type.income {
+  color: var(--green);
+}
+
+.entry-type.expense {
+  color: var(--red);
+}
+
+.week {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 8px;
+}
+
+.week-day {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  align-items: flex-start;
+  background: var(--offwhite);
+  border: 2px solid transparent;
+  border-radius: var(--radius);
+  padding: 12px;
+  color: var(--charcoal);
+  text-align: left;
+}
+
+.week-day.selected {
+  border-color: var(--charcoal);
+}
+
+.week-day.off {
+  background: transparent;
+  border: 1px dashed var(--stone-light);
+}
+
+.week-name {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+}
+
+.week-date {
+  font-size: 11px;
+  color: var(--stone);
+}
+
+.week-value {
+  margin-top: 4px;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.plan-note {
+  margin-top: 24px;
+  font-size: 12px;
+  line-height: 1.6;
+  color: var(--stone);
+}

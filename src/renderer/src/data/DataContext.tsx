@@ -1,5 +1,5 @@
 import { createContext, ReactNode, useContext, useEffect, useState } from 'react'
-import { AppData, Bill } from '../types'
+import { AppData, Bill, Entry } from '../types'
 import { createSampleData } from './sample'
 import { addMonths, todayISO } from '../utils/date'
 import { createId } from '../utils/bills'
@@ -8,6 +8,8 @@ type DataContextValue = {
   data: AppData
   markBillAsPaid: (id: string) => void
   undoBillPayment: (id: string) => void
+  addEntry: (entry: Omit<Entry, 'id'>) => void
+  removeEntry: (id: string) => void
 }
 
 const DataContext = createContext<DataContextValue | null>(null)
@@ -74,8 +76,19 @@ export function DataProvider({ children }: { children: ReactNode }): React.JSX.E
     })
   }
 
+  const addEntry = (entry: Omit<Entry, 'id'>): void => {
+    update((current) => ({
+      ...current,
+      entries: [...current.entries, { ...entry, id: createId() }]
+    }))
+  }
+
+  const removeEntry = (id: string): void => {
+    update((current) => ({ ...current, entries: current.entries.filter((e) => e.id !== id) }))
+  }
+
   return (
-    <DataContext.Provider value={{ data, markBillAsPaid, undoBillPayment }}>
+    <DataContext.Provider value={{ data, markBillAsPaid, undoBillPayment, addEntry, removeEntry }}>
       {children}
     </DataContext.Provider>
   )

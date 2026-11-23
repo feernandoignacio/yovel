@@ -4,10 +4,11 @@ import { useData } from './data/DataContext'
 import { BillsPage } from './pages/BillsPage'
 import { OverduePage } from './pages/OverduePage'
 import { ComingSoon } from './pages/ComingSoon'
+import { TodayPage } from './pages/TodayPage'
 import { billStatus } from './utils/bills'
 
 function App(): React.JSX.Element {
-  const [page, setPage] = useState<Page>('bills')
+  const [page, setPage] = useState<Page>('today')
   const { data } = useData()
 
   const dueSoonCount = data.bills.filter((b) => billStatus(b) === 'dueSoon').length
@@ -23,12 +24,7 @@ function App(): React.JSX.Element {
       />
 
       <main className="content">
-        {page === 'today' && (
-          <ComingSoon
-            title="Hoje"
-            description="Entradas e saídas do dia, meta de obrigações e meta de objetivos."
-          />
-        )}
+        {page === 'today' && <TodayPage />}
         {page === 'bills' && <BillsPage />}
         {page === 'overdue' && <OverduePage />}
         {page === 'goals' && (
