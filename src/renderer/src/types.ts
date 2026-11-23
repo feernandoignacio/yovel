@@ -31,6 +31,9 @@ export type Goal = {
   deadline: string // AAAA-MM-DD
 }
 
+// Dados da meta preenchidos no formulário
+export type GoalDraft = Omit<Goal, 'id'>
+
 export type Settings = {
   // Dias da semana em que trabalha (0 = domingo, 6 = sábado)
   workDays: number[]

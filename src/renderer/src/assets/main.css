@@ -666,3 +666,114 @@ button {
   gap: 8px;
   margin-top: 6px;
 }
+
+/* Aba Metas */
+.goals {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 16px;
+}
+
+.goal-card {
+  background: var(--offwhite);
+  border-radius: var(--radius);
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.goal-card.done {
+  border: 1px solid var(--green);
+}
+
+.goal-top {
+  margin-bottom: 6px;
+}
+
+.goal-values {
+  font-size: 13px;
+  color: var(--stone);
+}
+
+.goal-values strong {
+  font-size: 20px;
+  color: var(--charcoal);
+}
+
+.goal-actions,
+.goal-deposit {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 10px;
+}
+
+.goal-actions .link:first-of-type {
+  margin-left: 4px;
+}
+
+.goal-deposit .input {
+  width: 130px;
+}
+
+.payoff {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.payoff-controls {
+  display: grid;
+  grid-template-columns: auto 180px 1fr;
+  gap: 20px;
+  align-items: end;
+  background: var(--offwhite);
+  border-radius: var(--radius);
+  padding: 18px 20px;
+}
+
+.payoff-summary {
+  text-align: right;
+}
+
+.payoff-row {
+  display: grid;
+  grid-template-columns: 32px 1fr 140px 180px;
+  align-items: center;
+  gap: 16px;
+  background: var(--offwhite);
+  border-radius: var(--radius);
+  padding: 12px 18px;
+  border-left: 4px solid var(--red);
+}
+
+.payoff-index {
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  background: var(--charcoal);
+  color: var(--offwhite);
+  font-size: 12px;
+  font-weight: 700;
+  display: grid;
+  place-items: center;
+}
+
+.payoff-date {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--green);
+  text-align: right;
+}
+
+.payoff-cta {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+  border: 1px dashed var(--stone-light);
+  border-radius: var(--radius);
+  padding: 16px 20px;
+  color: var(--stone);
+}

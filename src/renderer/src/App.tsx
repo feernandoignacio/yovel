@@ -5,6 +5,7 @@ import { BillsPage } from './pages/BillsPage'
 import { OverduePage } from './pages/OverduePage'
 import { ComingSoon } from './pages/ComingSoon'
 import { TodayPage } from './pages/TodayPage'
+import { GoalsPage } from './pages/GoalsPage'
 import { billStatus } from './utils/bills'
 
 function App(): React.JSX.Element {
@@ -27,12 +28,7 @@ function App(): React.JSX.Element {
         {page === 'today' && <TodayPage />}
         {page === 'bills' && <BillsPage />}
         {page === 'overdue' && <OverduePage />}
-        {page === 'goals' && (
-          <ComingSoon
-            title="Metas"
-            description="Seus objetivos e quanto separar por dia para cada um."
-          />
-        )}
+        {page === 'goals' && <GoalsPage />}
         {page === 'reports' && (
           <ComingSoon title="Balanço" description="Resumo da semana e do mês, com gráficos." />
         )}

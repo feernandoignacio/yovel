@@ -1,4 +1,4 @@
-import { AppData, Entry, Goal } from '../types'
+import { AppData, Bill, Entry, Goal } from '../types'
 import { addDays, parseISO } from './date'
 import { sum } from './money'
 
@@ -124,4 +124,58 @@ export function goalsTargetFor(goals: Goal[], date: string, workDays: number[]):
     return days > 0 ? missing / days : missing
   })
   return Math.round(sum(values) * 100) / 100
+}
+
+// Quanto separar por dia de trabalho para chegar no valor até o prazo
+export function perWorkday(
+  missing: number,
+  from: string,
+  deadline: string,
+  workDays: number[]
+): number {
+  if (missing <= 0) return 0
+  const days = countWorkdays(from, deadline, workDays)
+  return Math.round((days > 0 ? missing / days : missing) * 100) / 100
+}
+
+export type PayoffStrategy = 'smallest' | 'oldest'
+
+// Ordem para quitar as vencidas: menor valor primeiro ou mais antiga primeiro
+export function orderForPayoff(bills: Bill[], strategy: PayoffStrategy): Bill[] {
+  return [...bills].sort((a, b) =>
+    strategy === 'smallest'
+      ? a.amount - b.amount || a.dueDate.localeCompare(b.dueDate)
+      : a.dueDate.localeCompare(b.dueDate) || a.amount - b.amount
+  )
+}
+
+/*
+  Previsão de quando cada vencida fica quitada separando um valor fixo por dia de trabalho.
+  Vai acumulando dia a dia e, quando o acumulado cobre a conta da vez, ela é dada como quitada.
+*/
+export function payoffDates(
+  ordered: Bill[],
+  perDay: number,
+  from: string,
+  workDays: number[]
+): Record<string, string> {
+  const result: Record<string, string> = {}
+  if (perDay <= 0 || workDays.length === 0) return result
+
+  let saved = 0
+  let index = 0
+  let day = from
+  // Limite de 3 anos para não rodar para sempre com valores muito baixos
+  for (let i = 0; i < 365 * 3 && index < ordered.length; i++) {
+    if (isWorkday(day, workDays)) {
+      saved += perDay
+      while (index < ordered.length && saved + 0.001 >= ordered[index].amount) {
+        saved -= ordered[index].amount
+        result[ordered[index].id] = day
+        index++
+      }
+    }
+    day = addDays(day, 1)
+  }
+  return result
 }

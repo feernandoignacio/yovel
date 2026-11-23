@@ -1,5 +1,5 @@
 import { createContext, ReactNode, useContext, useEffect, useState } from 'react'
-import { AppData, Bill, BillDraft, Entry } from '../types'
+import { AppData, Bill, BillDraft, Entry, GoalDraft } from '../types'
 import { createSampleData } from './sample'
 import { addMonths, todayISO } from '../utils/date'
 import { createId } from '../utils/bills'
@@ -13,6 +13,10 @@ type DataContextValue = {
   addBill: (draft: BillDraft, installments: number) => void
   updateBill: (id: string, draft: BillDraft) => void
   deleteBill: (id: string) => void
+  addGoal: (draft: GoalDraft) => void
+  updateGoal: (id: string, draft: GoalDraft) => void
+  deleteGoal: (id: string) => void
+  addToGoal: (id: string, amount: number) => void
 }
 
 const DataContext = createContext<DataContextValue | null>(null)
@@ -117,6 +121,31 @@ export function DataProvider({ children }: { children: ReactNode }): React.JSX.E
     update((current) => ({ ...current, bills: current.bills.filter((b) => b.id !== id) }))
   }
 
+  const addGoal = (draft: GoalDraft): void => {
+    update((current) => ({ ...current, goals: [...current.goals, { ...draft, id: createId() }] }))
+  }
+
+  const updateGoal = (id: string, draft: GoalDraft): void => {
+    update((current) => ({
+      ...current,
+      goals: current.goals.map((g) => (g.id === id ? { ...g, ...draft } : g))
+    }))
+  }
+
+  const deleteGoal = (id: string): void => {
+    update((current) => ({ ...current, goals: current.goals.filter((g) => g.id !== id) }))
+  }
+
+  // Soma (ou tira, se negativo) um valor do que já foi guardado na meta
+  const addToGoal = (id: string, amount: number): void => {
+    update((current) => ({
+      ...current,
+      goals: current.goals.map((g) =>
+        g.id === id ? { ...g, saved: Math.max(0, Math.round((g.saved + amount) * 100) / 100) } : g
+      )
+    }))
+  }
+
   return (
     <DataContext.Provider
       value={{
@@ -127,7 +156,11 @@ export function DataProvider({ children }: { children: ReactNode }): React.JSX.E
         removeEntry,
         addBill,
         updateBill,
-        deleteBill
+        deleteBill,
+        addGoal,
+        updateGoal,
+        deleteGoal,
+        addToGoal
       }}
     >
       {children}
