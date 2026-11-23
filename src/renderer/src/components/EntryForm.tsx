@@ -2,18 +2,21 @@ import { FormEvent, useState } from 'react'
 import { Entry } from '../types'
 import { parseAmount } from '../utils/money'
 import { Select } from './Select'
+import { useData } from '../data/DataContext'
+import { categoriesOf } from '../data/sample'
 
 type Props = {
   date: string
   onAdd: (entry: Omit<Entry, 'id'>) => void
 }
 
-const categories = {
-  income: ['Corridas', 'Gorjeta', 'Freela', 'Outros'],
-  expense: ['Combustível', 'Alimentação', 'Manutenção do carro', 'Mercado', 'Outros']
-}
-
 export function EntryForm({ date, onAdd }: Props): React.JSX.Element {
+  const { data } = useData()
+  // Categorias que a pessoa escolheu em Ajustes
+  const categories = {
+    income: categoriesOf(data.settings, 'income'),
+    expense: categoriesOf(data.settings, 'expense')
+  }
   const [type, setType] = useState<Entry['type']>('income')
   const [amount, setAmount] = useState('')
   const [category, setCategory] = useState(categories.income[0])
@@ -32,7 +35,9 @@ export function EntryForm({ date, onAdd }: Props): React.JSX.Element {
       setError('Digite um valor maior que zero.')
       return
     }
-    onAdd({ date, type, amount: value, category, description: description.trim() })
+    // Se a categoria escolhida foi apagada em Ajustes, usa a primeira da lista
+    const finalCategory = categories[type].includes(category) ? category : categories[type][0]
+    onAdd({ date, type, amount: value, category: finalCategory, description: description.trim() })
     setAmount('')
     setDescription('')
     setError('')
@@ -65,7 +70,11 @@ export function EntryForm({ date, onAdd }: Props): React.JSX.Element {
         onChange={(e) => setAmount(e.target.value)}
       />
 
-      <Select value={category} options={categories[type]} onChange={setCategory} />
+      <Select
+        value={categories[type].includes(category) ? category : categories[type][0]}
+        options={categories[type]}
+        onChange={setCategory}
+      />
 
       <input
         className="input input-grow"

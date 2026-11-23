@@ -1,6 +1,6 @@
 import { createContext, ReactNode, useContext, useEffect, useState } from 'react'
 import { AppData, Bill, BillDraft, Entry, GoalDraft } from '../types'
-import { createEmptyData } from './sample'
+import { categoriesOf, createEmptyData } from './sample'
 import { addMonths, todayISO } from '../utils/date'
 import { createId } from '../utils/bills'
 
@@ -19,6 +19,8 @@ type DataContextValue = {
   addToGoal: (id: string, amount: number) => void
   replaceData: (data: AppData) => void
   setWorkDays: (workDays: number[]) => void
+  setCategories: (type: Entry['type'], categories: string[]) => void
+  renameCategory: (type: Entry['type'], from: string, to: string) => void
 }
 
 const DataContext = createContext<DataContextValue | null>(null)
@@ -160,6 +162,26 @@ export function DataProvider({ children }: { children: ReactNode }): React.JSX.E
     }))
   }
 
+  const setCategories = (type: Entry['type'], categories: string[]): void => {
+    const key = type === 'income' ? 'incomeCategories' : 'expenseCategories'
+    update((current) => ({ ...current, settings: { ...current.settings, [key]: categories } }))
+  }
+
+  // Renomeia a categoria e também os lançamentos antigos, para o Balanço continuar somando junto
+  const renameCategory = (type: Entry['type'], from: string, to: string): void => {
+    const key = type === 'income' ? 'incomeCategories' : 'expenseCategories'
+    update((current) => ({
+      ...current,
+      settings: {
+        ...current.settings,
+        [key]: categoriesOf(current.settings, type).map((c) => (c === from ? to : c))
+      },
+      entries: current.entries.map((e) =>
+        e.type === type && e.category === from ? { ...e, category: to } : e
+      )
+    }))
+  }
+
   return (
     <DataContext.Provider
       value={{
@@ -176,7 +198,9 @@ export function DataProvider({ children }: { children: ReactNode }): React.JSX.E
         deleteGoal,
         addToGoal,
         replaceData,
-        setWorkDays
+        setWorkDays,
+        setCategories,
+        renameCategory
       }}
     >
       {children}

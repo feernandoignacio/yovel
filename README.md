@@ -14,7 +14,7 @@ The app starts empty. To see how it works with sample data first, go to **Ajuste
 
 ## Features
 
-- **Today**: log income and expenses for each day. The daily target for obligations is the month's bills minus what was already left over on previous days, split across the remaining workdays (Monday to Saturday). If a day falls short, the difference is spread over the next days; if it goes over, the next targets drop. Upcoming days show the same target, assuming each day until then hits it. Goals have a separate target, so they never feel like an obligation
+- **Today**: log income and expenses for each day. The daily target for obligations is the month's bills divided by all the workdays in the month (for example, 3,000 in a month with 26 workdays is 115.38 a day). If a day falls short, the difference is spread over the next days; if it goes over, the next targets drop. Upcoming days show the same target, assuming each day until then hits it. Goals have a separate target, so they never feel like an obligation
 - **Bills up to date**: open bills sorted by due date, with a warning when a bill is due in the next 3 days
 - **Overdue**: bills move here automatically once the due date passes, with the total owed
 - **Goals**: personal goals with a deadline, showing how much to set aside per workday. Goals feed the separate goals target on the Today tab
@@ -24,7 +24,7 @@ The app starts empty. To see how it works with sample data first, go to **Ajuste
 - **Recurring bills**: paying a fixed bill creates next month's one automatically
 - **Windows notifications**: a warning when bills are due in the next 3 days and a stronger one when they are overdue, shown once a day. Clicking it opens the right tab
 - **Runs in the system tray**: closing the window keeps the app running next to the clock, with an option to start with Windows (installed version only)
-- **Settings**: choose your workdays, save and restore a backup file, start from scratch or load the sample data again
+- **Settings**: choose your workdays, rename the income and expense categories, save and restore a backup file, start from scratch or load the sample data again
 - **Automatic updates**: the installed app checks the GitHub releases, downloads new versions in the background and shows a button to restart and update
 - Data is saved locally in a JSON file (`%APPDATA%/yovel/yovel-dados.json`), nothing goes to a server
 

@@ -46,8 +46,28 @@ export function createSampleData(): AppData {
   }
 }
 
+export const defaultIncomeCategories = ['Corridas', 'Gorjeta', 'Freela', 'Outros']
+export const defaultExpenseCategories = [
+  'Combustível',
+  'Alimentação',
+  'Manutenção do carro',
+  'Mercado',
+  'Outros'
+]
+
 export function defaultSettings(): Settings {
-  return { workDays: [1, 2, 3, 4, 5, 6] }
+  return {
+    workDays: [1, 2, 3, 4, 5, 6],
+    incomeCategories: [...defaultIncomeCategories],
+    expenseCategories: [...defaultExpenseCategories]
+  }
+}
+
+// Categorias salvas ou, se ainda não tiver, as padrão
+export function categoriesOf(settings: Settings, type: 'income' | 'expense'): string[] {
+  const saved = type === 'income' ? settings.incomeCategories : settings.expenseCategories
+  if (saved && saved.length > 0) return saved
+  return type === 'income' ? defaultIncomeCategories : defaultExpenseCategories
 }
 
 // App zerado, sem contas, lançamentos nem metas
@@ -57,7 +77,7 @@ export function createEmptyData(workDays?: number[]): AppData {
     bills: [],
     entries: [],
     goals: [],
-    settings: { workDays: workDays ?? defaultSettings().workDays }
+    settings: { ...defaultSettings(), workDays: workDays ?? defaultSettings().workDays }
   }
 }
 

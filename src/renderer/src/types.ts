@@ -37,6 +37,9 @@ export type GoalDraft = Omit<Goal, 'id'>
 export type Settings = {
   // Dias da semana em que trabalha (0 = domingo, 6 = sábado)
   workDays: number[]
+  // Nomes das categorias de entrada e saída, editáveis em Ajustes
+  incomeCategories?: string[]
+  expenseCategories?: string[]
 }
 
 export type AppData = {

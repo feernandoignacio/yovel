@@ -51,9 +51,11 @@ export type DayPlan = {
   date: string
   isWorkday: boolean
   monthObligations: number // contas com vencimento neste mês
+  monthWorkdays: number // dias de trabalho do mês inteiro
+  base: number // contas do mês divididas pelos dias de trabalho do mês
+  deficit: number // diferença acumulada antes deste dia (positivo = ficou para trás)
   coveredBefore: number // o que já sobrou nos dias anteriores do mês
-  remaining: number // o que ainda falta juntar no mês
-  workdaysLeft: number // dias de trabalho de hoje até o fim do mês
+  workdaysLeft: number // dias de trabalho deste dia até o fim do mês
   target: number // meta de obrigações do dia
   totals: DayTotals
   difference: number // positivo = passou da meta, negativo = faltou
@@ -61,14 +63,32 @@ export type DayPlan = {
   extra: number // o que passou da meta de obrigações e pode ir para os objetivos
 }
 
+const round = (value: number): number => Math.round(value * 100) / 100
+
+type MonthBase = { monthObligations: number; monthWorkdays: number; base: number }
+
+// Contas do mês divididas por todos os dias de trabalho do mês
+function monthBase(data: AppData, date: string): MonthBase {
+  const monthKey = date.slice(0, 7)
+  const monthObligations = sum(
+    data.bills.filter((b) => b.dueDate.slice(0, 7) === monthKey).map((b) => b.amount)
+  )
+  const monthWorkdays = countWorkdays(`${monthKey}-01`, endOfMonth(date), data.settings.workDays)
+  const base = monthWorkdays > 0 ? monthObligations / monthWorkdays : 0
+  return { monthObligations, monthWorkdays, base }
+}
+
 /*
   Meta de obrigações do dia:
-  1. Soma todas as contas com vencimento no mês
-  2. Tira o que já sobrou (entradas menos saídas) nos dias anteriores do mês
-  3. Divide o que falta pelos dias de trabalho que restam, contando hoje
+  1. Base: soma das contas com vencimento no mês dividida por todos os dias de trabalho do mês.
+     Ex: 3.000 em contas num mês com 26 dias de trabalho dá 115,38 por dia.
+  2. Diferença acumulada: desde o primeiro lançamento do mês, quanto você ficou para trás
+     (ou passou) da base em cada dia.
+  3. Essa diferença é espalhada nos dias de trabalho que restam no mês, contando hoje.
 
-  Assim, se num dia você faz menos, a diferença é espalhada nos dias seguintes.
+  Assim, se num dia você faz menos, a diferença é dividida nos dias seguintes.
   Se faz mais, a meta dos próximos dias cai.
+  Os dias antes do primeiro lançamento do mês não contam, porque você ainda não usava o app.
 
   Dias futuros usam a previsão de projectedPlan: a meta fica igual em todos eles.
 */
@@ -76,39 +96,42 @@ export function planFor(data: AppData, date: string, today: string = todayISO())
   if (date > today) return projectedPlan(data, date, today)
 
   const { workDays } = data.settings
-  const monthKey = date.slice(0, 7)
-  const monthStart = `${monthKey}-01`
+  const monthStart = `${date.slice(0, 7)}-01`
   const monthEnd = endOfMonth(date)
+  const { monthObligations, monthWorkdays, base } = monthBase(data, date)
 
-  const monthObligations = sum(
-    data.bills.filter((b) => b.dueDate.slice(0, 7) === monthKey).map((b) => b.amount)
-  )
+  // Começa a contar a diferença a partir do primeiro lançamento do mês
+  const firstEntry = data.entries
+    .filter((e) => e.date >= monthStart && e.date <= monthEnd)
+    .reduce<string | null>((first, e) => (!first || e.date < first ? e.date : first), null)
+  const start = firstEntry && firstEntry < date ? firstEntry : date
 
-  const earlierEntries = data.entries.filter((e) => e.date >= monthStart && e.date < date)
+  const earlierEntries = data.entries.filter((e) => e.date >= start && e.date < date)
   const coveredBefore = totalsFor(earlierEntries).net
-  const remaining = Math.max(0, sum([monthObligations, -coveredBefore]))
+  const expectedBefore = start < date ? base * countWorkdays(start, addDays(date, -1), workDays) : 0
+  const deficit = round(expectedBefore - coveredBefore)
 
   const workday = isWorkday(date, workDays)
   const workdaysLeft = countWorkdays(date, monthEnd, workDays)
 
-  let target = 0
-  if (workday && workdaysLeft > 0) target = remaining / workdaysLeft
-  target = Math.round(target * 100) / 100
+  const target = workday && workdaysLeft > 0 ? round(Math.max(0, base + deficit / workdaysLeft)) : 0
 
   const totals = totalsFor(entriesOn(data.entries, date))
   const difference = sum([totals.net, -target])
 
   // Meta dos próximos dias de trabalho caso o dia termine com o resultado atual
   const daysAfter = workday ? workdaysLeft - 1 : workdaysLeft
-  const remainingAfter = Math.max(0, sum([remaining, -totals.net]))
-  const nextTarget = daysAfter > 0 ? Math.round((remainingAfter / daysAfter) * 100) / 100 : null
+  const deficitAfter = deficit + (workday ? base : 0) - totals.net
+  const nextTarget = daysAfter > 0 ? round(Math.max(0, base + deficitAfter / daysAfter)) : null
 
   return {
     date,
     isWorkday: workday,
     monthObligations,
+    monthWorkdays,
+    base: round(base),
+    deficit,
     coveredBefore,
-    remaining,
     workdaysLeft,
     target,
     totals,
@@ -119,50 +142,41 @@ export function planFor(data: AppData, date: string, today: string = todayISO())
 }
 
 /*
-  Previsão para dias que ainda não chegaram.
-  Sem isso, a conta acima considera que você não ganha nada até lá, e a meta vai
-  crescendo até o fim do mês (ex: 100 na segunda e 700 no sábado).
-  Aqui a gente supõe que cada dia até lá bate a meta, então ela fica igual:
-  - No mês atual: o que falta depois de hoje dividido pelos dias de trabalho seguintes.
-  - Em outro mês: as contas daquele mês divididas pelos dias de trabalho dele.
+  Previsão para dias que ainda não chegaram, supondo que cada dia até lá bate a meta.
+  Assim a meta fica igual em todos os dias futuros, em vez de ir crescendo.
+  - No mês atual: se hoje ainda não tem lançamento, é a própria meta de hoje.
+    Se já tem, é a meta dos próximos dias caso hoje feche como está.
+  - Em outro mês: a base daquele mês (contas do mês divididas pelos dias de trabalho dele).
 */
 function projectedPlan(data: AppData, date: string, today: string): DayPlan {
   const { workDays } = data.settings
   const workday = isWorkday(date, workDays)
   // Se já tiver algo lançado nesse dia (ex: lançou adiantado), mostra também
   const totals = totalsFor(entriesOn(data.entries, date))
+  const { monthObligations, monthWorkdays, base } = monthBase(data, date)
 
   let target = 0
-  let monthObligations: number
-  let remaining: number
-  let workdaysLeft: number
-
+  let deficit = 0
   if (date.slice(0, 7) === today.slice(0, 7)) {
     const current = planFor(data, today, today)
-    monthObligations = current.monthObligations
-    remaining = Math.max(0, sum([current.remaining, -current.totals.net]))
-    workdaysLeft = countWorkdays(date, endOfMonth(date), workDays)
-    if (workday) target = current.nextTarget ?? 0
-  } else {
-    const monthKey = date.slice(0, 7)
-    const monthStart = `${monthKey}-01`
-    monthObligations = sum(
-      data.bills.filter((b) => b.dueDate.slice(0, 7) === monthKey).map((b) => b.amount)
-    )
-    remaining = monthObligations
-    workdaysLeft = countWorkdays(date, endOfMonth(date), workDays)
-    const monthWorkdays = countWorkdays(monthStart, endOfMonth(date), workDays)
-    if (workday && monthWorkdays > 0)
-      target = Math.round((monthObligations / monthWorkdays) * 100) / 100
+    const todayHasEntries = entriesOn(data.entries, today).length > 0
+    const flat =
+      current.isWorkday && !todayHasEntries ? current.target : (current.nextTarget ?? base)
+    deficit = current.deficit
+    if (workday) target = flat
+  } else if (workday) {
+    target = round(base)
   }
 
   return {
     date,
     isWorkday: workday,
     monthObligations,
+    monthWorkdays,
+    base: round(base),
+    deficit,
     coveredBefore: 0,
-    remaining,
-    workdaysLeft,
+    workdaysLeft: countWorkdays(date, endOfMonth(date), workDays),
     target,
     totals,
     difference: sum([totals.net, -target]),

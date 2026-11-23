@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { useData } from '../data/DataContext'
 import { createEmptyData, createSampleData, isAppData } from '../data/sample'
+import { CategoryEditor } from '../components/CategoryEditor'
 
 const days = [
   { value: 1, label: 'Seg' },
@@ -50,8 +51,8 @@ export function SettingsPage(): React.JSX.Element {
   }
 
   const resetData = (): void => {
-    // Mantém os dias de trabalho escolhidos
-    replaceData(createEmptyData(workDays))
+    // Mantém os ajustes (dias de trabalho e categorias)
+    replaceData({ ...createEmptyData(workDays), settings: data.settings })
     setConfirm(null)
     setMessage({ type: 'success', text: 'Tudo zerado. Pode começar a cadastrar as suas contas.' })
   }
@@ -66,7 +67,7 @@ export function SettingsPage(): React.JSX.Element {
     <section className="page">
       <header className="page-header">
         <h1>Ajustes</h1>
-        <p className="page-subtitle">Dias de trabalho, backup e dados do app.</p>
+        <p className="page-subtitle">Dias de trabalho, categorias, backup e dados do app.</p>
       </header>
 
       {message && <div className={`alert alert-${message.type}`}>{message.text}</div>}
@@ -87,6 +88,16 @@ export function SettingsPage(): React.JSX.Element {
             </button>
           ))}
         </div>
+      </div>
+
+      <h2 className="section-title">Categorias</h2>
+      <div className="settings-box">
+        <p className="settings-text">
+          Os nomes que aparecem na hora de lançar o que entrou e o que saiu. Clique no nome para
+          renomear. Renomear também muda os lançamentos antigos daquela categoria.
+        </p>
+        <CategoryEditor type="income" title="Entradas" />
+        <CategoryEditor type="expense" title="Saídas" />
       </div>
 
       <h2 className="section-title">Backup</h2>

@@ -178,9 +178,12 @@ export function TodayPage(): React.JSX.Element {
       </div>
 
       <p className="plan-note">
-        Contas deste mês: {formatMoney(plan.monthObligations)}. Já sobrou nos dias anteriores:{' '}
-        {formatMoney(plan.coveredBefore)}. Falta juntar {formatMoney(plan.remaining)} em{' '}
-        {plan.workdaysLeft} {plan.workdaysLeft === 1 ? 'dia de trabalho' : 'dias de trabalho'}.
+        Contas deste mês: {formatMoney(plan.monthObligations)}, divididas em {plan.monthWorkdays}{' '}
+        dias de trabalho, dá {formatMoney(plan.base)} por dia.{' '}
+        {plan.deficit > 0.009 &&
+          `Até ontem ficaram para trás ${formatMoney(plan.deficit)}, espalhados nos ${plan.workdaysLeft} dias de trabalho que restam.`}
+        {plan.deficit < -0.009 &&
+          `Até ontem você passou ${formatMoney(-plan.deficit)} da meta, por isso a meta dos próximos dias está menor.`}{' '}
         Contas vencidas de meses anteriores entram no plano da aba Metas.
       </p>
     </section>
