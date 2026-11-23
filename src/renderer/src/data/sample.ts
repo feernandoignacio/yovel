@@ -1,4 +1,4 @@
-import { AppData, Bill } from '../types'
+import { AppData, Bill, Settings } from '../types'
 import { addDays, todayISO } from '../utils/date'
 import { createId } from '../utils/bills'
 
@@ -41,8 +41,35 @@ export function createSampleData(): AppData {
     ],
     entries: [],
     goals: [],
-    settings: {
-      workDays: [1, 2, 3, 4, 5, 6]
-    }
+    settings: defaultSettings(),
+    sample: true
   }
+}
+
+export function defaultSettings(): Settings {
+  return { workDays: [1, 2, 3, 4, 5, 6] }
+}
+
+// App zerado, sem contas, lançamentos nem metas
+export function createEmptyData(workDays?: number[]): AppData {
+  return {
+    version: 1,
+    bills: [],
+    entries: [],
+    goals: [],
+    settings: { workDays: workDays ?? defaultSettings().workDays }
+  }
+}
+
+// Confere se um arquivo de backup tem o formato do Yovel
+export function isAppData(value: unknown): value is AppData {
+  const data = value as AppData
+  return (
+    typeof data === 'object' &&
+    data !== null &&
+    Array.isArray(data.bills) &&
+    Array.isArray(data.entries) &&
+    Array.isArray(data.goals) &&
+    Array.isArray(data.settings?.workDays)
+  )
 }

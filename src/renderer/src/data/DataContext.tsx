@@ -17,6 +17,8 @@ type DataContextValue = {
   updateGoal: (id: string, draft: GoalDraft) => void
   deleteGoal: (id: string) => void
   addToGoal: (id: string, amount: number) => void
+  replaceData: (data: AppData) => void
+  setWorkDays: (workDays: number[]) => void
 }
 
 const DataContext = createContext<DataContextValue | null>(null)
@@ -146,6 +148,18 @@ export function DataProvider({ children }: { children: ReactNode }): React.JSX.E
     }))
   }
 
+  // Troca todos os dados de uma vez (começar do zero, dados de exemplo ou backup)
+  const replaceData = (next: AppData): void => {
+    setData(next)
+  }
+
+  const setWorkDays = (workDays: number[]): void => {
+    update((current) => ({
+      ...current,
+      settings: { ...current.settings, workDays: [...workDays].sort() }
+    }))
+  }
+
   return (
     <DataContext.Provider
       value={{
@@ -160,7 +174,9 @@ export function DataProvider({ children }: { children: ReactNode }): React.JSX.E
         addGoal,
         updateGoal,
         deleteGoal,
-        addToGoal
+        addToGoal,
+        replaceData,
+        setWorkDays
       }}
     >
       {children}

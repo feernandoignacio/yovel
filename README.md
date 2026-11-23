@@ -10,7 +10,7 @@ Get the latest Windows installer on the [Releases page](https://github.com/feern
 
 The app is not code signed, so Windows may show "Windows protected your PC" when you open the installer. Click **More info** and then **Run anyway**.
 
-On first launch the app opens with sample data so you can see how it works.
+On first launch the app opens with sample data so you can see how it works. To start using it with your own bills, go to **Ajustes** and click **Apagar tudo**.
 
 ## Features
 
@@ -24,6 +24,7 @@ On first launch the app opens with sample data so you can see how it works.
 - **Recurring bills**: paying a fixed bill creates next month's one automatically
 - **Windows notifications**: a warning when bills are due in the next 3 days and a stronger one when they are overdue, shown once a day. Clicking it opens the right tab
 - **Runs in the system tray**: closing the window keeps the app running next to the clock, with an option to start with Windows (installed version only)
+- **Settings**: choose your workdays, save and restore a backup file, start from scratch or load the sample data again
 - Data is saved locally in a JSON file (`%APPDATA%/yovel/yovel-dados.json`), nothing goes to a server
 
 ## Tech stack

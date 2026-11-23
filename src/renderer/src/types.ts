@@ -45,4 +45,5 @@ export type AppData = {
   entries: Entry[]
   goals: Goal[]
   settings: Settings
+  sample?: boolean // true enquanto o app estiver com os dados de exemplo
 }

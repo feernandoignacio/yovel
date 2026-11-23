@@ -931,3 +931,91 @@ button {
   background: var(--stone);
   border-radius: 4px;
 }
+
+/* Aba Ajustes */
+.nav-settings {
+  margin-top: auto;
+  margin-bottom: 16px;
+}
+
+.sidebar-footer {
+  margin-top: 0;
+}
+
+.sample-banner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  max-width: 980px;
+}
+
+.settings-box {
+  background: var(--offwhite);
+  border-radius: var(--radius);
+  padding: 18px 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.settings-text {
+  font-size: 13px;
+  color: var(--stone);
+  line-height: 1.5;
+}
+
+.settings-actions {
+  display: flex;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+.settings-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 24px;
+}
+
+.settings-row + .settings-row {
+  padding-top: 14px;
+  border-top: 1px solid var(--sand-dark);
+}
+
+.settings-danger {
+  border: 1px solid var(--red-bg);
+}
+
+.days {
+  display: flex;
+  gap: 8px;
+}
+
+.day-chip {
+  width: 56px;
+  padding: 10px 0;
+  border-radius: 8px;
+  border: 1px solid var(--stone-light);
+  background: transparent;
+  color: var(--stone);
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.day-chip.active {
+  background: var(--charcoal);
+  border-color: var(--charcoal);
+  color: var(--offwhite);
+}
+
+.btn-danger {
+  background: var(--red);
+}
+
+.btn-danger-outline {
+  background: transparent;
+  color: var(--red);
+  border: 1px solid var(--red);
+  flex-shrink: 0;
+}

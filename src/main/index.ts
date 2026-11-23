@@ -4,6 +4,7 @@ import { electronApp, optimizer, is } from '@electron-toolkit/utils'
 import icon from '../../resources/icon.png?asset'
 import { loadData, saveData } from './storage'
 import { checkBills, NotifyTarget, startBillChecks } from './notifications'
+import { exportBackup, importBackup } from './backup'
 
 let mainWindow: BrowserWindow | null = null
 let tray: Tray | null = null
@@ -123,6 +124,8 @@ if (!app.requestSingleInstanceLock()) {
     // Ponte entre a tela (React) e o arquivo de dados
     ipcMain.handle('data:load', () => loadData())
     ipcMain.handle('data:save', (_event, data: unknown) => saveData(data))
+    ipcMain.handle('backup:export', (_event, data: unknown) => exportBackup(mainWindow, data))
+    ipcMain.handle('backup:import', () => importBackup(mainWindow))
 
     createWindow()
     createTray()

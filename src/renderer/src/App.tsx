@@ -6,6 +6,7 @@ import { OverduePage } from './pages/OverduePage'
 import { TodayPage } from './pages/TodayPage'
 import { GoalsPage } from './pages/GoalsPage'
 import { ReportsPage } from './pages/ReportsPage'
+import { SettingsPage } from './pages/SettingsPage'
 import { billStatus } from './utils/bills'
 
 function App(): React.JSX.Element {
@@ -32,11 +33,25 @@ function App(): React.JSX.Element {
       />
 
       <main className="content">
+        {/* Aviso enquanto o app estiver com os dados de exemplo */}
+        {data.sample && page !== 'settings' && (
+          <div className="alert alert-warning sample-banner">
+            <span>
+              Você está vendo dados de exemplo. Quando quiser usar com os seus, comece do zero em
+              Ajustes.
+            </span>
+            <button className="btn" onClick={() => setPage('settings')}>
+              Ir para Ajustes
+            </button>
+          </div>
+        )}
+
         {page === 'today' && <TodayPage />}
         {page === 'bills' && <BillsPage />}
         {page === 'overdue' && <OverduePage />}
         {page === 'goals' && <GoalsPage />}
         {page === 'reports' && <ReportsPage />}
+        {page === 'settings' && <SettingsPage />}
       </main>
     </div>
   )

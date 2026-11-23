@@ -1,6 +1,6 @@
 import logo from '../assets/rign-logo.svg'
 
-export type Page = 'today' | 'bills' | 'overdue' | 'goals' | 'reports'
+export type Page = 'today' | 'bills' | 'overdue' | 'goals' | 'reports' | 'settings'
 
 type Props = {
   current: Page
@@ -53,6 +53,13 @@ export function Sidebar({
           )
         })}
       </nav>
+
+      <button
+        className={`nav-item nav-settings ${current === 'settings' ? 'active' : ''}`}
+        onClick={() => onChange('settings')}
+      >
+        <span>Ajustes</span>
+      </button>
 
       <p className="sidebar-footer">por Rign Studio</p>
     </aside>
