@@ -14,11 +14,9 @@ Yovel (Jubilee) comes from Leviticus 25: every fifty years debts were forgiven a
 - **Add, edit and delete bills**: single, monthly recurring or split into installments
 - **Reports**: weekly and monthly summary with income, expenses, balance, days the target was hit, a daily balance chart with the daily target, expenses by category and bills paid
 - **Recurring bills**: paying a fixed bill creates next month's one automatically
+- **Windows notifications**: a warning when bills are due in the next 3 days and a stronger one when they are overdue, shown once a day. Clicking it opens the right tab
+- **Runs in the system tray**: closing the window keeps the app running next to the clock, with an option to start with Windows (installed version only)
 - Data is saved locally in a JSON file (`%APPDATA%/yovel/yovel-dados.json`), nothing goes to a server
-
-### Coming next
-
-- Windows notifications for bills about to expire
 
 ## Tech stack
 

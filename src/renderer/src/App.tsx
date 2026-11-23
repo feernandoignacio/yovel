@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { Page, Sidebar } from './components/Sidebar'
 import { useData } from './data/DataContext'
 import { BillsPage } from './pages/BillsPage'
@@ -11,6 +11,13 @@ import { billStatus } from './utils/bills'
 function App(): React.JSX.Element {
   const [page, setPage] = useState<Page>('today')
   const { data } = useData()
+
+  // Clique num aviso do Windows abre a aba da conta (Contas em dia ou Vencidas)
+  useEffect(() => {
+    return window.api.onNavigate((target) => {
+      if (target === 'bills' || target === 'overdue') setPage(target)
+    })
+  }, [])
 
   const dueSoonCount = data.bills.filter((b) => billStatus(b) === 'dueSoon').length
   const overdueCount = data.bills.filter((b) => billStatus(b) === 'overdue').length
