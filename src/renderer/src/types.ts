@@ -9,6 +9,9 @@ export type Bill = {
   paidAt: string | null // data em que foi paga, ou null se está em aberto
 }
 
+// Dados da conta preenchidos no formulário
+export type BillDraft = Omit<Bill, 'id' | 'paidAt'>
+
 // Lançamento do dia: o que entrou ou saiu
 export type Entry = {
   id: string

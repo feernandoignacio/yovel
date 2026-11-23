@@ -1,5 +1,5 @@
 import { createContext, ReactNode, useContext, useEffect, useState } from 'react'
-import { AppData, Bill, Entry } from '../types'
+import { AppData, Bill, BillDraft, Entry } from '../types'
 import { createSampleData } from './sample'
 import { addMonths, todayISO } from '../utils/date'
 import { createId } from '../utils/bills'
@@ -10,6 +10,9 @@ type DataContextValue = {
   undoBillPayment: (id: string) => void
   addEntry: (entry: Omit<Entry, 'id'>) => void
   removeEntry: (id: string) => void
+  addBill: (draft: BillDraft, installments: number) => void
+  updateBill: (id: string, draft: BillDraft) => void
+  deleteBill: (id: string) => void
 }
 
 const DataContext = createContext<DataContextValue | null>(null)
@@ -87,8 +90,46 @@ export function DataProvider({ children }: { children: ReactNode }): React.JSX.E
     update((current) => ({ ...current, entries: current.entries.filter((e) => e.id !== id) }))
   }
 
+  // Nova conta. Se for parcelada, cria uma conta por parcela, uma por mês
+  const addBill = (draft: BillDraft, installments: number): void => {
+    const created: Bill[] =
+      installments > 1
+        ? Array.from({ length: installments }, (_, i) => ({
+            ...draft,
+            id: createId(),
+            name: `${draft.name} (${i + 1}/${installments})`,
+            dueDate: addMonths(draft.dueDate, i),
+            recurring: false,
+            paidAt: null
+          }))
+        : [{ ...draft, id: createId(), paidAt: null }]
+    update((current) => ({ ...current, bills: [...current.bills, ...created] }))
+  }
+
+  const updateBill = (id: string, draft: BillDraft): void => {
+    update((current) => ({
+      ...current,
+      bills: current.bills.map((b) => (b.id === id ? { ...b, ...draft } : b))
+    }))
+  }
+
+  const deleteBill = (id: string): void => {
+    update((current) => ({ ...current, bills: current.bills.filter((b) => b.id !== id) }))
+  }
+
   return (
-    <DataContext.Provider value={{ data, markBillAsPaid, undoBillPayment, addEntry, removeEntry }}>
+    <DataContext.Provider
+      value={{
+        data,
+        markBillAsPaid,
+        undoBillPayment,
+        addEntry,
+        removeEntry,
+        addBill,
+        updateBill,
+        deleteBill
+      }}
+    >
       {children}
     </DataContext.Provider>
   )

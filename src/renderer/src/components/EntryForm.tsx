@@ -1,5 +1,6 @@
 import { FormEvent, useState } from 'react'
 import { Entry } from '../types'
+import { parseAmount } from '../utils/money'
 
 type Props = {
   date: string
@@ -9,13 +10,6 @@ type Props = {
 const categories = {
   income: ['Corridas', 'Gorjeta', 'Freela', 'Outros'],
   expense: ['Combustível', 'Alimentação', 'Manutenção do carro', 'Mercado', 'Outros']
-}
-
-// Aceita "150", "150,50" e "1.250,90"
-function parseAmount(text: string): number {
-  const clean = text.trim().replace(/\./g, '').replace(',', '.')
-  const value = Number(clean)
-  return Number.isFinite(value) ? Math.round(value * 100) / 100 : NaN
 }
 
 export function EntryForm({ date, onAdd }: Props): React.JSX.Element {

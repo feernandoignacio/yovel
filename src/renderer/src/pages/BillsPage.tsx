@@ -1,11 +1,16 @@
+import { useState } from 'react'
 import { useData } from '../data/DataContext'
+import { BillForm } from '../components/BillForm'
+import { Bill } from '../types'
 import { BillRow } from '../components/BillRow'
 import { billStatus, byDueDate, DUE_SOON_DAYS } from '../utils/bills'
 import { isSameMonth } from '../utils/date'
 import { formatMoney, sum } from '../utils/money'
 
 export function BillsPage(): React.JSX.Element {
-  const { data, markBillAsPaid, undoBillPayment } = useData()
+  const { data, markBillAsPaid, undoBillPayment, addBill, updateBill, deleteBill } = useData()
+  // null = formulário fechado; { bill: undefined } = nova conta; { bill } = editando
+  const [form, setForm] = useState<{ bill?: Bill } | null>(null)
 
   // Contas em aberto que ainda não venceram
   const open = data.bills
@@ -21,11 +26,16 @@ export function BillsPage(): React.JSX.Element {
 
   return (
     <section className="page">
-      <header className="page-header">
-        <h1>Contas em dia</h1>
-        <p className="page-subtitle">
-          Tudo que ainda não venceu. Quando passar do vencimento, vai para Vencidas.
-        </p>
+      <header className="page-header page-header-row">
+        <div>
+          <h1>Contas em dia</h1>
+          <p className="page-subtitle">
+            Tudo que ainda não venceu. Quando passar do vencimento, vai para Vencidas.
+          </p>
+        </div>
+        <button className="btn" onClick={() => setForm({})}>
+          Nova conta
+        </button>
       </header>
 
       <div className="cards">
@@ -59,7 +69,13 @@ export function BillsPage(): React.JSX.Element {
           <p className="empty">Nenhuma conta em aberto. Tudo em dia.</p>
         ) : (
           open.map((bill) => (
-            <BillRow key={bill.id} bill={bill} onPay={() => markBillAsPaid(bill.id)} />
+            <BillRow
+              key={bill.id}
+              bill={bill}
+              onPay={() => markBillAsPaid(bill.id)}
+              onEdit={() => setForm({ bill })}
+              onDelete={() => deleteBill(bill.id)}
+            />
           ))
         )}
       </div>
@@ -73,6 +89,17 @@ export function BillsPage(): React.JSX.Element {
             ))}
           </div>
         </>
+      )}
+      {form && (
+        <BillForm
+          bill={form.bill}
+          onClose={() => setForm(null)}
+          onSave={(draft, installments) => {
+            if (form.bill) updateBill(form.bill.id, draft)
+            else addBill(draft, installments)
+            setForm(null)
+          }}
+        />
       )}
     </section>
   )
