@@ -12,12 +12,12 @@ Yovel (Jubilee) comes from Leviticus 25: every fifty years debts were forgiven a
 - **Goals**: personal goals with a deadline, showing how much to set aside per workday. Goals feed the separate goals target on the Today tab
 - **Overdue payoff plan**: choose to pay the smallest or the oldest first, pick a deadline and see how much to set aside per workday and when each overdue bill gets paid off
 - **Add, edit and delete bills**: single, monthly recurring or split into installments
+- **Reports**: weekly and monthly summary with income, expenses, balance, days the target was hit, a daily balance chart with the daily target, expenses by category and bills paid
 - **Recurring bills**: paying a fixed bill creates next month's one automatically
 - Data is saved locally in a JSON file (`%APPDATA%/yovel/yovel-dados.json`), nothing goes to a server
 
 ### Coming next
 
-- Weekly and monthly reports with charts
 - Windows notifications for bills about to expire
 
 ## Tech stack

@@ -3,9 +3,9 @@ import { Page, Sidebar } from './components/Sidebar'
 import { useData } from './data/DataContext'
 import { BillsPage } from './pages/BillsPage'
 import { OverduePage } from './pages/OverduePage'
-import { ComingSoon } from './pages/ComingSoon'
 import { TodayPage } from './pages/TodayPage'
 import { GoalsPage } from './pages/GoalsPage'
+import { ReportsPage } from './pages/ReportsPage'
 import { billStatus } from './utils/bills'
 
 function App(): React.JSX.Element {
@@ -29,9 +29,7 @@ function App(): React.JSX.Element {
         {page === 'bills' && <BillsPage />}
         {page === 'overdue' && <OverduePage />}
         {page === 'goals' && <GoalsPage />}
-        {page === 'reports' && (
-          <ComingSoon title="Balanço" description="Resumo da semana e do mês, com gráficos." />
-        )}
+        {page === 'reports' && <ReportsPage />}
       </main>
     </div>
   )
