@@ -14,7 +14,8 @@ asarUnpack:
 win:
   executableName: yovel
 nsis:
-  artifactName: ${name}-${version}-setup.${ext}
+  # Instalador sai só como Yovel.exe, sem a versão no nome
+  artifactName: ${productName}.${ext}
   shortcutName: ${productName}
   uninstallDisplayName: ${productName}
   createDesktopShortcut: always

@@ -36,6 +36,6 @@ jobs:
           generate_release_notes: true
                     # latest.yml e .blockmap são usados pelo app para achar e baixar a versão nova
           files: |
-            dist/*-setup.exe
-            dist/*-setup.exe.blockmap
+            dist/Yovel.exe
+            dist/Yovel.exe.blockmap
             dist/latest.yml

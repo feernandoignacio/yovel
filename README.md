@@ -6,7 +6,7 @@ Yovel (Jubilee) comes from Leviticus 25: every fifty years debts were forgiven a
 
 ## Download
 
-Get the latest Windows installer on the [Releases page](https://github.com/feernandoignacio/yovel/releases/latest).
+[Download Yovel for Windows](https://github.com/feernandoignacio/yovel/releases/latest/download/Yovel.exe) (always the latest version) or see all versions on the [Releases page](https://github.com/feernandoignacio/yovel/releases).
 
 The app is not code signed, so Windows may show "Windows protected your PC" when you open the installer. Click **More info** and then **Run anyway**.
 
