@@ -1240,3 +1240,43 @@ input[type='number']::-webkit-outer-spin-button {
 .calendar-today:hover:not(:disabled) {
   background: var(--sand);
 }
+
+/* Aviso de atualização */
+.update-banner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  max-width: 980px;
+  margin-bottom: 20px;
+  padding: 12px 18px;
+  border-radius: var(--radius);
+  background: var(--offwhite);
+  border: 1px dashed var(--stone-light);
+  color: var(--stone);
+  font-size: 13px;
+}
+
+.update-banner.ready {
+  background: var(--charcoal);
+  border: none;
+  color: var(--offwhite);
+  font-weight: 500;
+}
+
+.update-banner.ready .btn {
+  background: var(--sand);
+  color: var(--charcoal);
+  flex-shrink: 0;
+}
+
+.btn:disabled {
+  opacity: 0.6;
+  cursor: default;
+}
+
+.app-version {
+  margin-top: 32px;
+  font-size: 12px;
+  color: var(--stone);
+}

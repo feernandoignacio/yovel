@@ -25,6 +25,7 @@ The app starts empty. To see how it works with sample data first, go to **Ajuste
 - **Windows notifications**: a warning when bills are due in the next 3 days and a stronger one when they are overdue, shown once a day. Clicking it opens the right tab
 - **Runs in the system tray**: closing the window keeps the app running next to the clock, with an option to start with Windows (installed version only)
 - **Settings**: choose your workdays, save and restore a backup file, start from scratch or load the sample data again
+- **Automatic updates**: the installed app checks the GitHub releases, downloads new versions in the background and shows a button to restart and update
 - Data is saved locally in a JSON file (`%APPDATA%/yovel/yovel-dados.json`), nothing goes to a server
 
 ## Tech stack

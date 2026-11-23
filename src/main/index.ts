@@ -5,6 +5,7 @@ import icon from '../../resources/icon.png?asset'
 import { loadData, saveData } from './storage'
 import { checkBills, NotifyTarget, startBillChecks } from './notifications'
 import { exportBackup, importBackup } from './backup'
+import { checkForUpdatesNow, getUpdateStatus, installUpdate, setupUpdater } from './updater'
 
 let mainWindow: BrowserWindow | null = null
 let tray: Tray | null = null
@@ -77,6 +78,11 @@ function updateTrayMenu(): void {
     Menu.buildFromTemplate([
       { label: 'Abrir Yovel', click: () => showWindow() },
       { label: 'Conferir contas agora', click: () => checkBills(icon, showWindow, true) },
+      {
+        label: `Procurar atualização (versão ${app.getVersion()})`,
+        enabled: app.isPackaged,
+        click: () => checkForUpdatesNow()
+      },
       { type: 'separator' },
       {
         label: 'Iniciar com o Windows',
@@ -126,10 +132,17 @@ if (!app.requestSingleInstanceLock()) {
     ipcMain.handle('data:save', (_event, data: unknown) => saveData(data))
     ipcMain.handle('backup:export', (_event, data: unknown) => exportBackup(mainWindow, data))
     ipcMain.handle('backup:import', () => importBackup(mainWindow))
+    ipcMain.handle('app:version', () => app.getVersion())
+    ipcMain.handle('update:get', () => getUpdateStatus())
+    ipcMain.handle('update:install', () => {
+      isQuitting = true
+      installUpdate()
+    })
 
     createWindow()
     createTray()
     startBillChecks(icon, showWindow)
+    setupUpdater(() => mainWindow, icon)
 
     app.on('activate', () => showWindow())
   })

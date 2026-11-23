@@ -1,5 +1,6 @@
 import { contextBridge, ipcRenderer } from 'electron'
 import { electronAPI } from '@electron-toolkit/preload'
+import type { UpdateStatus } from '../main/updater'
 
 // Funções que a tela pode chamar para ler e salvar os dados
 const api = {
@@ -7,6 +8,15 @@ const api = {
   saveData: (data: unknown): Promise<void> => ipcRenderer.invoke('data:save', data),
   exportBackup: (data: unknown): Promise<boolean> => ipcRenderer.invoke('backup:export', data),
   importBackup: (): Promise<unknown | null> => ipcRenderer.invoke('backup:import'),
+  getVersion: (): Promise<string> => ipcRenderer.invoke('app:version'),
+  getUpdateStatus: (): Promise<UpdateStatus> => ipcRenderer.invoke('update:get'),
+  installUpdate: (): Promise<void> => ipcRenderer.invoke('update:install'),
+  onUpdateStatus: (callback: (status: UpdateStatus) => void): (() => void) => {
+    const listener = (_event: Electron.IpcRendererEvent, status: UpdateStatus): void =>
+      callback(status)
+    ipcRenderer.on('update:status', listener)
+    return () => ipcRenderer.removeListener('update:status', listener)
+  },
   // Avisa a tela quando um aviso do Windows pede para abrir uma aba
   onNavigate: (callback: (page: string) => void): (() => void) => {
     const listener = (_event: Electron.IpcRendererEvent, page: string): void => callback(page)

@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useData } from '../data/DataContext'
 import { createEmptyData, createSampleData, isAppData } from '../data/sample'
 
@@ -20,6 +20,11 @@ export function SettingsPage(): React.JSX.Element {
   const { workDays } = data.settings
   const [confirm, setConfirm] = useState<Confirm>(null)
   const [message, setMessage] = useState<Message>(null)
+  const [version, setVersion] = useState('')
+
+  useEffect(() => {
+    window.api.getVersion().then(setVersion)
+  }, [])
 
   const toggleDay = (day: number): void => {
     const next = workDays.includes(day) ? workDays.filter((d) => d !== day) : [...workDays, day]
@@ -151,6 +156,10 @@ export function SettingsPage(): React.JSX.Element {
           )}
         </div>
       </div>
+      <p className="app-version">
+        Operação Yovel {version && `versão ${version}`}. O app procura atualizações sozinho quando
+        abre.
+      </p>
     </section>
   )
 }

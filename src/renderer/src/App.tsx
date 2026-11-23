@@ -7,6 +7,7 @@ import { TodayPage } from './pages/TodayPage'
 import { GoalsPage } from './pages/GoalsPage'
 import { ReportsPage } from './pages/ReportsPage'
 import { SettingsPage } from './pages/SettingsPage'
+import { UpdateBanner } from './components/UpdateBanner'
 import { billStatus } from './utils/bills'
 
 function App(): React.JSX.Element {
@@ -33,6 +34,7 @@ function App(): React.JSX.Element {
       />
 
       <main className="content">
+        <UpdateBanner />
         {/* Aviso enquanto o app estiver com os dados de exemplo */}
         {data.sample && page !== 'settings' && (
           <div className="alert alert-warning sample-banner">
