@@ -3,7 +3,7 @@ import { useData } from '../data/DataContext'
 import { BillForm } from '../components/BillForm'
 import { Bill } from '../types'
 import { BillRow } from '../components/BillRow'
-import { billStatus, byDueDate, DUE_SOON_DAYS } from '../utils/bills'
+import { billStatus, byDueDate, getDueSoonDays } from '../utils/bills'
 import { isSameMonth } from '../utils/date'
 import { formatMoney, sum } from '../utils/money'
 
@@ -45,7 +45,7 @@ export function BillsPage(): React.JSX.Element {
           <p className="card-hint">{openThisMonth.length} contas</p>
         </div>
         <div className={`card ${dueSoon.length > 0 ? 'card-warning' : ''}`}>
-          <p className="card-label">Vence em até {DUE_SOON_DAYS} dias</p>
+          <p className="card-label">Vence em até {getDueSoonDays()} dias</p>
           <p className="card-value">{formatMoney(sum(dueSoon.map((b) => b.amount)))}</p>
           <p className="card-hint">{dueSoon.length} contas</p>
         </div>

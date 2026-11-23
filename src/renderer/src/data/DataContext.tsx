@@ -1,8 +1,8 @@
 import { createContext, ReactNode, useContext, useEffect, useState } from 'react'
-import { AppData, Bill, BillDraft, Entry, GoalDraft } from '../types'
+import { AppData, Bill, BillDraft, Entry, GoalDraft, Settings } from '../types'
 import { categoriesOf, createEmptyData } from './sample'
 import { addMonths, todayISO } from '../utils/date'
-import { createId } from '../utils/bills'
+import { createId, DUE_SOON_DAYS, setDueSoonDays } from '../utils/bills'
 
 type DataContextValue = {
   data: AppData
@@ -21,6 +21,8 @@ type DataContextValue = {
   setWorkDays: (workDays: number[]) => void
   setCategories: (type: Entry['type'], categories: string[]) => void
   renameCategory: (type: Entry['type'], from: string, to: string) => void
+  updateEntry: (id: string, entry: Omit<Entry, 'id'>) => void
+  updateSettings: (changes: Partial<Settings>) => void
 }
 
 const DataContext = createContext<DataContextValue | null>(null)
@@ -43,6 +45,9 @@ export function DataProvider({ children }: { children: ReactNode }): React.JSX.E
   if (!data) {
     return <div className="loading">Carregando...</div>
   }
+
+  // Antecedência do aviso escolhida em Ajustes, usada para marcar "vence em breve"
+  setDueSoonDays(data.settings.dueSoonDays ?? DUE_SOON_DAYS)
 
   const update = (change: (current: AppData) => AppData): void => {
     setData((current) => (current ? change(current) : current))
@@ -162,6 +167,18 @@ export function DataProvider({ children }: { children: ReactNode }): React.JSX.E
     }))
   }
 
+  const updateEntry = (id: string, entry: Omit<Entry, 'id'>): void => {
+    update((current) => ({
+      ...current,
+      entries: current.entries.map((e) => (e.id === id ? { ...entry, id } : e))
+    }))
+  }
+
+  // Muda só os ajustes informados, mantendo o resto
+  const updateSettings = (changes: Partial<Settings>): void => {
+    update((current) => ({ ...current, settings: { ...current.settings, ...changes } }))
+  }
+
   const setCategories = (type: Entry['type'], categories: string[]): void => {
     const key = type === 'income' ? 'incomeCategories' : 'expenseCategories'
     update((current) => ({ ...current, settings: { ...current.settings, [key]: categories } }))
@@ -200,7 +217,9 @@ export function DataProvider({ children }: { children: ReactNode }): React.JSX.E
         replaceData,
         setWorkDays,
         setCategories,
-        renameCategory
+        renameCategory,
+        updateEntry,
+        updateSettings
       }}
     >
       {children}

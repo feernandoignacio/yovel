@@ -40,6 +40,11 @@ export type Settings = {
   // Nomes das categorias de entrada e saída, editáveis em Ajustes
   incomeCategories?: string[]
   expenseCategories?: string[]
+  // Com quantos dias de antecedência a conta começa a avisar
+  dueSoonDays?: number
+  // Escolhas do plano para quitar as vencidas
+  payoffStrategy?: 'smallest' | 'oldest'
+  payoffDeadline?: string
 }
 
 export type AppData = {

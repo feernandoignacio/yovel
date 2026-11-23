@@ -3,7 +3,7 @@ import { join } from 'path'
 import { readFile, writeFile } from 'fs/promises'
 import { loadData } from './storage'
 
-// Mesmo prazo usado na tela (utils/bills.ts)
+// Prazo padrão, o mesmo da tela (utils/bills.ts). A pessoa pode mudar em Ajustes
 const DUE_SOON_DAYS = 3
 const CHECK_EVERY_MS = 60 * 60 * 1000 // de hora em hora
 
@@ -70,14 +70,18 @@ export async function checkBills(
 ): Promise<void> {
   if (!Notification.isSupported()) return
 
-  const data = (await loadData()) as { bills?: StoredBill[] } | null
+  const data = (await loadData()) as {
+    bills?: StoredBill[]
+    settings?: { dueSoonDays?: number }
+  } | null
   const bills = (data?.bills ?? []).filter((b) => !b.paidAt)
+  const dueSoonDays = data?.settings?.dueSoonDays ?? DUE_SOON_DAYS
   const state = force ? { date: todayISO(), dueSoon: false, overdue: false } : await loadState()
 
   const overdue = bills.filter((b) => daysUntil(b.dueDate) < 0)
   const dueSoon = bills.filter((b) => {
     const days = daysUntil(b.dueDate)
-    return days >= 0 && days <= DUE_SOON_DAYS
+    return days >= 0 && days <= dueSoonDays
   })
 
   // Aviso de vencidas: tom mais forte, diferente do aviso de "vence em breve"

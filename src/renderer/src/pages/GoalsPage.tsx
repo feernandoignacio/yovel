@@ -11,7 +11,7 @@ import { DatePicker } from '../components/DatePicker'
 type FormState = { goal?: Goal; initial?: Partial<GoalDraft> } | null
 
 export function GoalsPage(): React.JSX.Element {
-  const { data, addGoal, updateGoal, deleteGoal, addToGoal } = useData()
+  const { data, addGoal, updateGoal, deleteGoal, addToGoal, updateSettings } = useData()
   const { workDays } = data.settings
   const today = todayISO()
 
@@ -20,8 +20,13 @@ export function GoalsPage(): React.JSX.Element {
   const [depositValue, setDepositValue] = useState('')
   const [confirmDelete, setConfirmDelete] = useState<string | null>(null)
 
-  const [strategy, setStrategy] = useState<PayoffStrategy>('smallest')
-  const [payoffDeadline, setPayoffDeadline] = useState(addMonths(today, 6))
+  // Ordem e prazo do plano ficam salvos nos ajustes
+  const strategy: PayoffStrategy = data.settings.payoffStrategy ?? 'smallest'
+  const savedDeadline = data.settings.payoffDeadline
+  const payoffDeadline =
+    savedDeadline && savedDeadline >= today ? savedDeadline : addMonths(today, 6)
+  const setStrategy = (next: PayoffStrategy): void => updateSettings({ payoffStrategy: next })
+  const setPayoffDeadline = (next: string): void => updateSettings({ payoffDeadline: next })
 
   const goals = [...data.goals].sort((a, b) => a.deadline.localeCompare(b.deadline))
 

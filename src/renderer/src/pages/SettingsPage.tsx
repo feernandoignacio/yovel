@@ -2,6 +2,8 @@ import { useEffect, useState } from 'react'
 import { useData } from '../data/DataContext'
 import { createEmptyData, createSampleData, isAppData } from '../data/sample'
 import { CategoryEditor } from '../components/CategoryEditor'
+import { Select } from '../components/Select'
+import { DUE_SOON_DAYS } from '../utils/bills'
 
 const days = [
   { value: 1, label: 'Seg' },
@@ -13,11 +15,17 @@ const days = [
   { value: 0, label: 'Dom' }
 ]
 
+const noticeOptions = [1, 2, 3, 5, 7, 10]
+
+function dayLabel(days: number): string {
+  return days === 1 ? '1 dia antes' : `${days} dias antes`
+}
+
 type Confirm = 'reset' | 'sample' | null
 type Message = { type: 'success' | 'danger'; text: string } | null
 
 export function SettingsPage(): React.JSX.Element {
-  const { data, replaceData, setWorkDays } = useData()
+  const { data, replaceData, setWorkDays, updateSettings } = useData()
   const { workDays } = data.settings
   const [confirm, setConfirm] = useState<Confirm>(null)
   const [message, setMessage] = useState<Message>(null)
@@ -67,7 +75,9 @@ export function SettingsPage(): React.JSX.Element {
     <section className="page">
       <header className="page-header">
         <h1>Ajustes</h1>
-        <p className="page-subtitle">Dias de trabalho, categorias, backup e dados do app.</p>
+        <p className="page-subtitle">
+          Dias de trabalho, avisos, categorias, backup e dados do app.
+        </p>
       </header>
 
       {message && <div className={`alert alert-${message.type}`}>{message.text}</div>}
@@ -87,6 +97,23 @@ export function SettingsPage(): React.JSX.Element {
               {day.label}
             </button>
           ))}
+        </div>
+      </div>
+
+      <h2 className="section-title">Avisos</h2>
+      <div className="settings-box">
+        <div className="settings-row">
+          <p className="settings-text">
+            Com quantos dias de antecedência a conta fica amarela e aparece o aviso do Windows de
+            que vai vencer.
+          </p>
+          <div className="settings-select">
+            <Select
+              value={dayLabel(data.settings.dueSoonDays ?? DUE_SOON_DAYS)}
+              options={noticeOptions.map(dayLabel)}
+              onChange={(label) => updateSettings({ dueSoonDays: parseInt(label, 10) })}
+            />
+          </div>
         </div>
       </div>
 

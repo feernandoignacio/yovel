@@ -1,10 +1,26 @@
 import { useState } from 'react'
 import { useData } from '../data/DataContext'
 import { EntryForm } from '../components/EntryForm'
+import { EntryEditForm } from '../components/EntryEditForm'
+import { Entry } from '../types'
 import { addDays, formatDate, parseISO, todayISO } from '../utils/date'
 import { formatMoney } from '../utils/money'
-import { entriesOn, goalsTargetFor, planFor } from '../utils/plan'
+import { entriesOn, firstBillAtRisk, goalsTargetFor, planFor } from '../utils/plan'
 
+const monthNames = [
+  'janeiro',
+  'fevereiro',
+  'março',
+  'abril',
+  'maio',
+  'junho',
+  'julho',
+  'agosto',
+  'setembro',
+  'outubro',
+  'novembro',
+  'dezembro'
+]
 const weekDayNames = ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb']
 const longDayNames = ['Domingo', 'Segunda', 'Terça', 'Quarta', 'Quinta', 'Sexta', 'Sábado']
 
@@ -20,11 +36,16 @@ function signed(value: number): string {
 }
 
 export function TodayPage(): React.JSX.Element {
-  const { data, addEntry, removeEntry } = useData()
+  const { data, addEntry, removeEntry, updateEntry } = useData()
   const [date, setDate] = useState(todayISO())
+  const [editing, setEditing] = useState<Entry | null>(null)
+  const [confirmDelete, setConfirmDelete] = useState<string | null>(null)
 
   const today = todayISO()
   const plan = planFor(data, date)
+  // Só confere contas que não fecham no prazo quando está vendo o dia de hoje
+  const risk = date === today ? firstBillAtRisk(data, today) : null
+  const monthName = monthNames[parseISO(date).getMonth()]
   const dayEntries = entriesOn(data.entries, date)
   const goalsTarget = goalsTargetFor(data.goals, date, data.settings.workDays)
 
@@ -113,6 +134,42 @@ export function TodayPage(): React.JSX.Element {
         </div>
       </div>
 
+      {plan.monthObligations > 0 && (
+        <p className="plan-info">
+          <svg viewBox="0 0 16 16" aria-hidden="true">
+            <circle cx="8" cy="8" r="6.5" fill="none" stroke="currentColor" strokeWidth="1.3" />
+            <path
+              d="M8 7.2v4M8 4.8v.1"
+              stroke="currentColor"
+              strokeWidth="1.5"
+              strokeLinecap="round"
+            />
+          </svg>
+          <span>
+            Meta calculada pelo mês inteiro: {formatMoney(plan.monthObligations)} em contas de{' '}
+            {monthName} ÷ {plan.monthWorkdays} dias de trabalho = {formatMoney(plan.base)} por dia.
+            {plan.deficit > 0.009 &&
+              ` Até ontem ficaram para trás ${formatMoney(plan.deficit)}, divididos nos ${plan.workdaysLeft} dias de trabalho que restam.`}
+            {plan.deficit < -0.009 &&
+              ` Até ontem você passou ${formatMoney(-plan.deficit)} da meta, por isso a meta está menor.`}
+          </span>
+        </p>
+      )}
+
+      {risk && (
+        <div className="alert alert-warning">
+          <strong>
+            {risk.bill.name} vence dia {formatDate(risk.bill.dueDate).slice(0, 5)} (
+            {formatMoney(risk.bill.amount)}).
+          </strong>{' '}
+          {risk.required > risk.bill.amount + 0.009
+            ? `Somando com as outras contas que vencem antes, até lá você precisa de ${formatMoney(risk.required)}.`
+            : ''}{' '}
+          No ritmo da meta, até lá você junta {formatMoney(risk.available)}. Faltariam{' '}
+          {formatMoney(risk.missing)} para pagar no prazo.
+        </div>
+      )}
+
       {plan.target > 0 && dayEntries.length > 0 && plan.nextTarget !== null && (
         <div className={`alert ${plan.difference >= 0 ? 'alert-success' : 'alert-warning'}`}>
           {plan.difference >= 0
@@ -142,9 +199,27 @@ export function TodayPage(): React.JSX.Element {
                 {entry.type === 'income' ? '+' : '-'}
                 {formatMoney(entry.amount)}
               </p>
-              <button className="btn btn-ghost" onClick={() => removeEntry(entry.id)}>
-                Apagar
-              </button>
+              <div className="entry-actions">
+                {confirmDelete === entry.id ? (
+                  <>
+                    <button className="link link-danger" onClick={() => removeEntry(entry.id)}>
+                      Confirmar
+                    </button>
+                    <button className="link" onClick={() => setConfirmDelete(null)}>
+                      Cancelar
+                    </button>
+                  </>
+                ) : (
+                  <>
+                    <button className="link" onClick={() => setEditing(entry)}>
+                      Editar
+                    </button>
+                    <button className="link" onClick={() => setConfirmDelete(entry.id)}>
+                      Apagar
+                    </button>
+                  </>
+                )}
+              </div>
             </div>
           ))
         )}
@@ -177,15 +252,17 @@ export function TodayPage(): React.JSX.Element {
         })}
       </div>
 
-      <p className="plan-note">
-        Contas deste mês: {formatMoney(plan.monthObligations)}, divididas em {plan.monthWorkdays}{' '}
-        dias de trabalho, dá {formatMoney(plan.base)} por dia.{' '}
-        {plan.deficit > 0.009 &&
-          `Até ontem ficaram para trás ${formatMoney(plan.deficit)}, espalhados nos ${plan.workdaysLeft} dias de trabalho que restam.`}
-        {plan.deficit < -0.009 &&
-          `Até ontem você passou ${formatMoney(-plan.deficit)} da meta, por isso a meta dos próximos dias está menor.`}{' '}
-        Contas vencidas de meses anteriores entram no plano da aba Metas.
-      </p>
+      <p className="plan-note">Contas vencidas de meses anteriores entram no plano da aba Metas.</p>
+      {editing && (
+        <EntryEditForm
+          entry={editing}
+          onClose={() => setEditing(null)}
+          onSave={(entry) => {
+            updateEntry(editing.id, entry)
+            setEditing(null)
+          }}
+        />
+      )}
     </section>
   )
 }

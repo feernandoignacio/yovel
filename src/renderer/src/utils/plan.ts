@@ -250,3 +250,60 @@ export function payoffDates(
   }
   return result
 }
+
+export type BillRisk = {
+  bill: Bill // primeira conta que não fecha no prazo
+  required: number // soma das contas em aberto do mês até o vencimento dela
+  available: number // quanto dá para juntar até lá no ritmo da meta
+  missing: number
+}
+
+/*
+  Confere se alguma conta do mês vence antes de dar tempo de juntar o dinheiro no ritmo da meta.
+  - Guardado: o que sobrou desde o primeiro lançamento do mês, menos as contas pagas nesse tempo.
+  - Até cada vencimento: guardado + o que falta de hoje + a meta de cada dia de trabalho até lá.
+  - Precisa: soma das contas do mês ainda em aberto que vencem até essa data.
+*/
+export function firstBillAtRisk(data: AppData, today: string = todayISO()): BillRisk | null {
+  const { workDays } = data.settings
+  const monthKey = today.slice(0, 7)
+  const monthEnd = endOfMonth(today)
+  const plan = planFor(data, today, today)
+
+  const firstEntry = data.entries
+    .filter((e) => e.date.slice(0, 7) === monthKey && e.date <= today)
+    .reduce<string | null>((first, e) => (!first || e.date < first ? e.date : first), null)
+  const start = firstEntry ?? today
+
+  const earned = totalsFor(data.entries.filter((e) => e.date >= start && e.date <= today)).net
+  const paid = sum(
+    data.bills
+      .filter((b) => b.paidAt && b.paidAt >= start && b.paidAt <= today)
+      .map((b) => b.amount)
+  )
+  const saved = earned - paid
+  const restOfToday = plan.isWorkday ? Math.max(0, plan.target - plan.totals.net) : 0
+  // Meta dos próximos dias, supondo que hoje bate a meta (igual aos dias futuros da semana)
+  const daily = planFor(data, addDays(today, 1), today).target || plan.target
+
+  const open = data.bills
+    .filter((b) => !b.paidAt && b.dueDate.slice(0, 7) === monthKey && b.dueDate <= monthEnd)
+    .sort((a, b) => a.dueDate.localeCompare(b.dueDate))
+
+  let required = 0
+  for (const bill of open) {
+    required += bill.amount
+    const until = bill.dueDate < today ? today : bill.dueDate
+    const futureDays = until > today ? countWorkdays(addDays(today, 1), until, workDays) : 0
+    const available = saved + restOfToday + daily * futureDays
+    if (required - available > 0.01) {
+      return {
+        bill,
+        required: round(required),
+        available: round(Math.max(0, available)),
+        missing: round(required - Math.max(0, available))
+      }
+    }
+  }
+  return null
+}

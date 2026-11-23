@@ -1,8 +1,19 @@
 import { Bill } from '../types'
 import { daysUntil } from './date'
 
-// Quantos dias antes do vencimento a conta começa a avisar
+// Quantos dias antes do vencimento a conta começa a avisar (padrão)
 export const DUE_SOON_DAYS = 3
+
+// Valor escolhido em Ajustes. O DataProvider atualiza sempre que os dados mudam
+let dueSoonDays = DUE_SOON_DAYS
+
+export function setDueSoonDays(days: number): void {
+  dueSoonDays = days
+}
+
+export function getDueSoonDays(): number {
+  return dueSoonDays
+}
 
 export type BillStatus = 'paid' | 'overdue' | 'dueSoon' | 'upcoming'
 
@@ -10,7 +21,7 @@ export function billStatus(bill: Bill): BillStatus {
   if (bill.paidAt) return 'paid'
   const days = daysUntil(bill.dueDate)
   if (days < 0) return 'overdue'
-  if (days <= DUE_SOON_DAYS) return 'dueSoon'
+  if (days <= dueSoonDays) return 'dueSoon'
   return 'upcoming'
 }
 
