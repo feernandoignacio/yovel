@@ -4,6 +4,14 @@ Personal finance desktop app by **Rign Studio**.
 
 Yovel (Jubilee) comes from Leviticus 25: every fifty years debts were forgiven and every family got back what it had lost. The app is built around that idea: getting each bill back in order, one day at a time.
 
+## Download
+
+Get the latest Windows installer on the [Releases page](https://github.com/feernandoignacio/yovel/releases/latest).
+
+The app is not code signed, so Windows may show "Windows protected your PC" when you open the installer. Click **More info** and then **Run anyway**.
+
+On first launch the app opens with sample data so you can see how it works.
+
 ## Features
 
 - **Today**: log income and expenses for each day. The daily target for obligations is the month's bills minus what was already left over on previous days, split across the remaining workdays (Monday to Saturday). If a day falls short, the difference is spread over the next days; if it goes over, the next targets drop. Goals have a separate target, so they never feel like an obligation
@@ -35,6 +43,15 @@ npm run dev
 
 ```bash
 npm run build:win
+```
+
+## Releasing a new version
+
+A GitHub Actions workflow builds the Windows installer and publishes it on the Releases page whenever a version tag is pushed:
+
+```bash
+npm version patch
+git push --follow-tags
 ```
 
 ---
