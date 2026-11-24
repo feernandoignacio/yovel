@@ -47,141 +47,212 @@ export function entriesOn(entries: Entry[], date: string): Entry[] {
   return entries.filter((e) => e.date === date)
 }
 
+const round = (value: number): number => Math.round(value * 100) / 100
+
+// Cada conta começa a contar na meta no máximo esse número de dias antes de vencer
+export const SAVING_WINDOW_DAYS = 30
+
+// Quanto uma conta está pedindo por dia até o vencimento dela
+export type BillShare = {
+  bill: Bill
+  remaining: number // o que ainda falta guardar para essa conta
+  days: number // dias de trabalho deste dia até o vencimento, contando os dois
+  perDay: number
+}
+
 export type DayPlan = {
   date: string
   isWorkday: boolean
-  monthObligations: number // contas com vencimento neste mês
-  monthWorkdays: number // dias de trabalho do mês inteiro
-  base: number // contas do mês divididas pelos dias de trabalho do mês
-  deficit: number // diferença acumulada antes deste dia (positivo = ficou para trás)
-  coveredBefore: number // o que já sobrou nos dias anteriores do mês
-  workdaysLeft: number // dias de trabalho deste dia até o fim do mês
+  saved: number // total já guardado para as contas que estão contando
+  shares: BillShare[] // contas que estão contando na meta deste dia
   target: number // meta de obrigações do dia
   totals: DayTotals
   difference: number // positivo = passou da meta, negativo = faltou
-  nextTarget: number | null // meta dos próximos dias se o dia fechar assim
+  nextTarget: number | null // meta do próximo dia de trabalho se o dia fechar assim
   extra: number // o que passou da meta de obrigações e pode ir para os objetivos
 }
 
-const round = (value: number): number => Math.round(value * 100) / 100
-
-type MonthBase = { monthObligations: number; monthWorkdays: number; base: number }
-
-// Contas do mês divididas por todos os dias de trabalho do mês
-function monthBase(data: AppData, date: string): MonthBase {
-  const monthKey = date.slice(0, 7)
-  const monthObligations = sum(
-    data.bills.filter((b) => b.dueDate.slice(0, 7) === monthKey).map((b) => b.amount)
-  )
-  const monthWorkdays = countWorkdays(`${monthKey}-01`, endOfMonth(date), data.settings.workDays)
-  const base = monthWorkdays > 0 ? monthObligations / monthWorkdays : 0
-  return { monthObligations, monthWorkdays, base }
+// Data em que a conta começa a contar na meta: 30 dias antes de vencer
+export function savingStart(bill: Bill): string {
+  return addDays(bill.dueDate, -SAVING_WINDOW_DAYS)
 }
 
 /*
-  Meta de obrigações do dia:
-  1. Base: soma das contas com vencimento no mês dividida por todos os dias de trabalho do mês.
-     Ex: 3.000 em contas num mês com 26 dias de trabalho dá 115,38 por dia.
-  2. Diferença acumulada: desde o primeiro lançamento do mês, quanto você ficou para trás
-     (ou passou) da base em cada dia.
-  3. Essa diferença é espalhada nos dias de trabalho que restam no mês, contando hoje.
-
-  Assim, se num dia você faz menos, a diferença é dividida nos dias seguintes.
-  Se faz mais, a meta dos próximos dias cai.
-  Os dias antes do primeiro lançamento do mês não contam, porque você ainda não usava o app.
-
-  Dias futuros usam a previsão de projectedPlan: a meta fica igual em todos eles.
+  Como a meta funciona (envelopes):
+  - Cada conta tem um "envelope" com o que já foi guardado para ela.
+  - Uma conta começa a contar 30 dias antes de vencer (ou hoje, se já estiver nesse prazo).
+  - A cada dia de trabalho, cada conta pede o que falta no envelope dela dividido pelos
+    dias de trabalho até o vencimento. A meta do dia é a soma disso.
+  - O que entra no dia vai para os envelopes na mesma proporção. O que passar da meta
+    vai para a conta que vence antes. Se faltar, cada envelope fica menor e o que faltou
+    se espalha sozinho nos dias seguintes até o vencimento de cada conta.
+  Assim cada conta pede um valor fixo por dia até vencer, e a meta só muda quando
+  uma conta nova começa a contar, é paga ou quando você fica para trás ou passa da meta.
 */
-export function planFor(data: AppData, date: string, today: string = todayISO()): DayPlan {
-  if (date > today) return projectedPlan(data, date, today)
+type State = {
+  covered: Map<string, number> // valor no envelope de cada conta
+  free: number // dinheiro guardado que ainda não foi para nenhum envelope
+  open: Bill[] // contas em aberto, da que vence antes para a que vence depois
+}
 
+function cloneState(state: State): State {
+  return { covered: new Map(state.covered), free: state.free, open: [...state.open] }
+}
+
+function isCounting(bill: Bill, day: string): boolean {
+  return savingStart(bill) <= day && bill.dueDate >= day
+}
+
+// Põe o dinheiro livre nos envelopes das contas que estão contando, da que vence antes.
+// Se o livre estiver negativo (gastou mais do que entrou), tira dos envelopes das que vencem depois
+function settle(state: State, day: string): void {
+  if (state.free > 0) {
+    for (const bill of state.open) {
+      if (state.free <= 0) break
+      if (!isCounting(bill, day)) continue
+      const has = state.covered.get(bill.id) ?? 0
+      const add = Math.min(state.free, bill.amount - has)
+      if (add > 0) {
+        state.covered.set(bill.id, has + add)
+        state.free -= add
+      }
+    }
+  } else if (state.free < 0) {
+    for (const bill of [...state.open].reverse()) {
+      if (state.free >= 0) break
+      const has = state.covered.get(bill.id) ?? 0
+      const take = Math.min(has, -state.free)
+      state.covered.set(bill.id, has - take)
+      state.free += take
+    }
+  }
+}
+
+function sharesOn(state: State, day: string, workDays: number[]): BillShare[] {
+  if (!isWorkday(day, workDays)) return []
+  const shares: BillShare[] = []
+  for (const bill of state.open) {
+    // Conta já paga nesse dia não pede mais nada
+    if (!isCounting(bill, day) || (bill.paidAt && bill.paidAt <= day)) continue
+    const remaining = round(bill.amount - (state.covered.get(bill.id) ?? 0))
+    if (remaining <= 0) continue
+    const days = Math.max(1, countWorkdays(day, bill.dueDate, workDays))
+    shares.push({ bill, remaining, days, perDay: round(remaining / days) })
+  }
+  return shares
+}
+
+// Divide o que entrou no dia entre os envelopes
+function addEarnings(state: State, shares: BillShare[], net: number, day: string): void {
+  const target = sum(shares.map((s) => s.perDay))
+  if (net <= 0 || target <= 0) {
+    state.free += net
+  } else {
+    const ratio = Math.min(1, net / target)
+    for (const share of shares) {
+      const has = state.covered.get(share.bill.id) ?? 0
+      state.covered.set(share.bill.id, has + share.perDay * ratio)
+    }
+    state.free += Math.max(0, net - target)
+  }
+  settle(state, day)
+}
+
+// Fim do dia: tira as contas pagas e as que venceram
+function closeDay(state: State, day: string, assumePaidOnDue: boolean): void {
+  const leaving = state.open.filter(
+    (b) => b.paidAt === day || (b.dueDate === day && (assumePaidOnDue || b.paidAt === day))
+  )
+  const expired = state.open.filter((b) => b.dueDate === day && !b.paidAt && !assumePaidOnDue)
+
+  for (const bill of leaving) {
+    // Pagou: usa o envelope e o que faltar sai do dinheiro livre
+    state.free -= bill.amount - (state.covered.get(bill.id) ?? 0)
+    state.covered.delete(bill.id)
+  }
+  for (const bill of expired) {
+    // Venceu sem pagar: vai para Vencidas e o dinheiro do envelope volta a ficar livre
+    state.free += state.covered.get(bill.id) ?? 0
+    state.covered.delete(bill.id)
+  }
+  const gone = new Set([...leaving, ...expired].map((b) => b.id))
+  state.open = state.open.filter((b) => !gone.has(b.id))
+  settle(state, day)
+}
+
+/*
+  Refaz os envelopes dia a dia, do primeiro lançamento até o dia pedido.
+  Dias que já passaram usam o que foi lançado de verdade.
+  Dias futuros supõem que a meta é batida e que cada conta é paga no vencimento.
+*/
+function stateAt(data: AppData, date: string, today: string): State {
   const { workDays } = data.settings
-  const monthStart = `${date.slice(0, 7)}-01`
-  const monthEnd = endOfMonth(date)
-  const { monthObligations, monthWorkdays, base } = monthBase(data, date)
+  const firstEntry = data.entries.reduce<string | null>(
+    (first, e) => (!first || e.date < first ? e.date : first),
+    null
+  )
+  // Começa no primeiro lançamento. Para dias futuros, começa no máximo hoje
+  let start = date > today ? today : date
+  if (firstEntry && firstEntry < start) start = firstEntry
 
-  // Começa a contar a diferença a partir do primeiro lançamento do mês
-  const firstEntry = data.entries
-    .filter((e) => e.date >= monthStart && e.date <= monthEnd)
-    .reduce<string | null>((first, e) => (!first || e.date < first ? e.date : first), null)
-  const start = firstEntry && firstEntry < date ? firstEntry : date
+  const state: State = {
+    covered: new Map(),
+    free: 0,
+    open: data.bills
+      .filter((b) => b.dueDate >= start && (!b.paidAt || b.paidAt >= start))
+      .sort((a, b) => a.dueDate.localeCompare(b.dueDate))
+  }
 
-  const earlierEntries = data.entries.filter((e) => e.date >= start && e.date < date)
-  const coveredBefore = totalsFor(earlierEntries).net
-  const expectedBefore = start < date ? base * countWorkdays(start, addDays(date, -1), workDays) : 0
-  const deficit = round(expectedBefore - coveredBefore)
+  const todayHasEntries = entriesOn(data.entries, today).length > 0
+  for (let day = start; day < date; day = addDays(day, 1)) {
+    settle(state, day)
+    const shares = sharesOn(state, day, workDays)
+    const target = sum(shares.map((s) => s.perDay))
+    const real = day < today || (day === today && todayHasEntries)
+    const net = real ? totalsFor(entriesOn(data.entries, day)).net : target
+    addEarnings(state, shares, net, day)
+    closeDay(state, day, day >= today)
+  }
+  settle(state, date)
+  return state
+}
 
-  const workday = isWorkday(date, workDays)
-  const workdaysLeft = countWorkdays(date, monthEnd, workDays)
-
-  const target = workday && workdaysLeft > 0 ? round(Math.max(0, base + deficit / workdaysLeft)) : 0
-
+export function planFor(data: AppData, date: string, today: string = todayISO()): DayPlan {
+  const { workDays } = data.settings
+  const state = stateAt(data, date, today)
+  const shares = sharesOn(state, date, workDays)
+  const target = round(sum(shares.map((s) => s.perDay)))
   const totals = totalsFor(entriesOn(data.entries, date))
   const difference = sum([totals.net, -target])
+  const saved = round(
+    sum(state.open.filter((b) => isCounting(b, date)).map((b) => state.covered.get(b.id) ?? 0))
+  )
 
-  // Meta dos próximos dias de trabalho caso o dia termine com o resultado atual
-  const daysAfter = workday ? workdaysLeft - 1 : workdaysLeft
-  const deficitAfter = deficit + (workday ? base : 0) - totals.net
-  const nextTarget = daysAfter > 0 ? round(Math.max(0, base + deficitAfter / daysAfter)) : null
+  // Meta do próximo dia de trabalho se este dia fechar com o resultado atual
+  let nextTarget: number | null = null
+  const next = cloneState(state)
+  addEarnings(next, shares, totals.net, date)
+  closeDay(next, date, date >= today)
+  for (let day = addDays(date, 1), i = 0; i < 14; day = addDays(day, 1), i++) {
+    settle(next, day)
+    const nextShares = sharesOn(next, day, workDays)
+    if (isWorkday(day, workDays)) {
+      nextTarget = round(sum(nextShares.map((s) => s.perDay)))
+      break
+    }
+    closeDay(next, day, true)
+  }
 
   return {
     date,
-    isWorkday: workday,
-    monthObligations,
-    monthWorkdays,
-    base: round(base),
-    deficit,
-    coveredBefore,
-    workdaysLeft,
+    isWorkday: isWorkday(date, workDays),
+    saved,
+    shares,
     target,
     totals,
     difference,
     nextTarget,
     extra: Math.max(0, difference)
-  }
-}
-
-/*
-  Previsão para dias que ainda não chegaram, supondo que cada dia até lá bate a meta.
-  Assim a meta fica igual em todos os dias futuros, em vez de ir crescendo.
-  - No mês atual: se hoje ainda não tem lançamento, é a própria meta de hoje.
-    Se já tem, é a meta dos próximos dias caso hoje feche como está.
-  - Em outro mês: a base daquele mês (contas do mês divididas pelos dias de trabalho dele).
-*/
-function projectedPlan(data: AppData, date: string, today: string): DayPlan {
-  const { workDays } = data.settings
-  const workday = isWorkday(date, workDays)
-  // Se já tiver algo lançado nesse dia (ex: lançou adiantado), mostra também
-  const totals = totalsFor(entriesOn(data.entries, date))
-  const { monthObligations, monthWorkdays, base } = monthBase(data, date)
-
-  let target = 0
-  let deficit = 0
-  if (date.slice(0, 7) === today.slice(0, 7)) {
-    const current = planFor(data, today, today)
-    const todayHasEntries = entriesOn(data.entries, today).length > 0
-    const flat =
-      current.isWorkday && !todayHasEntries ? current.target : (current.nextTarget ?? base)
-    deficit = current.deficit
-    if (workday) target = flat
-  } else if (workday) {
-    target = round(base)
-  }
-
-  return {
-    date,
-    isWorkday: workday,
-    monthObligations,
-    monthWorkdays,
-    base: round(base),
-    deficit,
-    coveredBefore: 0,
-    workdaysLeft: countWorkdays(date, endOfMonth(date), workDays),
-    target,
-    totals,
-    difference: sum([totals.net, -target]),
-    nextTarget: target,
-    extra: Math.max(0, sum([totals.net, -target]))
   }
 }
 
@@ -249,61 +320,4 @@ export function payoffDates(
     day = addDays(day, 1)
   }
   return result
-}
-
-export type BillRisk = {
-  bill: Bill // primeira conta que não fecha no prazo
-  required: number // soma das contas em aberto do mês até o vencimento dela
-  available: number // quanto dá para juntar até lá no ritmo da meta
-  missing: number
-}
-
-/*
-  Confere se alguma conta do mês vence antes de dar tempo de juntar o dinheiro no ritmo da meta.
-  - Guardado: o que sobrou desde o primeiro lançamento do mês, menos as contas pagas nesse tempo.
-  - Até cada vencimento: guardado + o que falta de hoje + a meta de cada dia de trabalho até lá.
-  - Precisa: soma das contas do mês ainda em aberto que vencem até essa data.
-*/
-export function firstBillAtRisk(data: AppData, today: string = todayISO()): BillRisk | null {
-  const { workDays } = data.settings
-  const monthKey = today.slice(0, 7)
-  const monthEnd = endOfMonth(today)
-  const plan = planFor(data, today, today)
-
-  const firstEntry = data.entries
-    .filter((e) => e.date.slice(0, 7) === monthKey && e.date <= today)
-    .reduce<string | null>((first, e) => (!first || e.date < first ? e.date : first), null)
-  const start = firstEntry ?? today
-
-  const earned = totalsFor(data.entries.filter((e) => e.date >= start && e.date <= today)).net
-  const paid = sum(
-    data.bills
-      .filter((b) => b.paidAt && b.paidAt >= start && b.paidAt <= today)
-      .map((b) => b.amount)
-  )
-  const saved = earned - paid
-  const restOfToday = plan.isWorkday ? Math.max(0, plan.target - plan.totals.net) : 0
-  // Meta dos próximos dias, supondo que hoje bate a meta (igual aos dias futuros da semana)
-  const daily = planFor(data, addDays(today, 1), today).target || plan.target
-
-  const open = data.bills
-    .filter((b) => !b.paidAt && b.dueDate.slice(0, 7) === monthKey && b.dueDate <= monthEnd)
-    .sort((a, b) => a.dueDate.localeCompare(b.dueDate))
-
-  let required = 0
-  for (const bill of open) {
-    required += bill.amount
-    const until = bill.dueDate < today ? today : bill.dueDate
-    const futureDays = until > today ? countWorkdays(addDays(today, 1), until, workDays) : 0
-    const available = saved + restOfToday + daily * futureDays
-    if (required - available > 0.01) {
-      return {
-        bill,
-        required: round(required),
-        available: round(Math.max(0, available)),
-        missing: round(required - Math.max(0, available))
-      }
-    }
-  }
-  return null
 }

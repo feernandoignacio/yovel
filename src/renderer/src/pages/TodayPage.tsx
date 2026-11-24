@@ -5,22 +5,8 @@ import { EntryEditForm } from '../components/EntryEditForm'
 import { Entry } from '../types'
 import { addDays, formatDate, parseISO, todayISO } from '../utils/date'
 import { formatMoney } from '../utils/money'
-import { entriesOn, firstBillAtRisk, goalsTargetFor, planFor } from '../utils/plan'
+import { entriesOn, goalsTargetFor, planFor, SAVING_WINDOW_DAYS } from '../utils/plan'
 
-const monthNames = [
-  'janeiro',
-  'fevereiro',
-  'março',
-  'abril',
-  'maio',
-  'junho',
-  'julho',
-  'agosto',
-  'setembro',
-  'outubro',
-  'novembro',
-  'dezembro'
-]
 const weekDayNames = ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb']
 const longDayNames = ['Domingo', 'Segunda', 'Terça', 'Quarta', 'Quinta', 'Sexta', 'Sábado']
 
@@ -43,9 +29,6 @@ export function TodayPage(): React.JSX.Element {
 
   const today = todayISO()
   const plan = planFor(data, date)
-  // Só confere contas que não fecham no prazo quando está vendo o dia de hoje
-  const risk = date === today ? firstBillAtRisk(data, today) : null
-  const monthName = monthNames[parseISO(date).getMonth()]
   const dayEntries = entriesOn(data.entries, date)
   const goalsTarget = goalsTargetFor(data.goals, date, data.settings.workDays)
 
@@ -134,39 +117,37 @@ export function TodayPage(): React.JSX.Element {
         </div>
       </div>
 
-      {plan.monthObligations > 0 && (
-        <p className="plan-info">
-          <svg viewBox="0 0 16 16" aria-hidden="true">
-            <circle cx="8" cy="8" r="6.5" fill="none" stroke="currentColor" strokeWidth="1.3" />
-            <path
-              d="M8 7.2v4M8 4.8v.1"
-              stroke="currentColor"
-              strokeWidth="1.5"
-              strokeLinecap="round"
-            />
-          </svg>
-          <span>
-            Meta calculada pelo mês inteiro: {formatMoney(plan.monthObligations)} em contas de{' '}
-            {monthName} ÷ {plan.monthWorkdays} dias de trabalho = {formatMoney(plan.base)} por dia.
-            {plan.deficit > 0.009 &&
-              ` Até ontem ficaram para trás ${formatMoney(plan.deficit)}, divididos nos ${plan.workdaysLeft} dias de trabalho que restam.`}
-            {plan.deficit < -0.009 &&
-              ` Até ontem você passou ${formatMoney(-plan.deficit)} da meta, por isso a meta está menor.`}
-          </span>
-        </p>
-      )}
-
-      {risk && (
-        <div className="alert alert-warning">
-          <strong>
-            {risk.bill.name} vence dia {formatDate(risk.bill.dueDate).slice(0, 5)} (
-            {formatMoney(risk.bill.amount)}).
-          </strong>{' '}
-          {risk.required > risk.bill.amount + 0.009
-            ? `Somando com as outras contas que vencem antes, até lá você precisa de ${formatMoney(risk.required)}.`
-            : ''}{' '}
-          No ritmo da meta, até lá você junta {formatMoney(risk.available)}. Faltariam{' '}
-          {formatMoney(risk.missing)} para pagar no prazo.
+      {plan.shares.length > 0 && (
+        <div className="shares">
+          <p className="plan-info">
+            <svg viewBox="0 0 16 16" aria-hidden="true">
+              <circle cx="8" cy="8" r="6.5" fill="none" stroke="currentColor" strokeWidth="1.3" />
+              <path
+                d="M8 7.2v4M8 4.8v.1"
+                stroke="currentColor"
+                strokeWidth="1.5"
+                strokeLinecap="round"
+              />
+            </svg>
+            <span>
+              A meta é a soma do que cada conta pede por dia até o vencimento dela. Cada conta
+              começa a contar {SAVING_WINDOW_DAYS} dias antes de vencer.
+              {plan.saved > 0.009 && ` Já guardado para essas contas: ${formatMoney(plan.saved)}.`}
+            </span>
+          </p>
+          <div className="share-list">
+            {plan.shares.map((share) => (
+              <div key={share.bill.id} className="share-row">
+                <span className="share-name">{share.bill.name}</span>
+                <span className="share-detail">
+                  faltam {formatMoney(share.remaining)} até{' '}
+                  {formatDate(share.bill.dueDate).slice(0, 5)} ({share.days}{' '}
+                  {share.days === 1 ? 'dia' : 'dias'})
+                </span>
+                <strong>{formatMoney(share.perDay)} por dia</strong>
+              </div>
+            ))}
+          </div>
         </div>
       )}
 
@@ -252,7 +233,9 @@ export function TodayPage(): React.JSX.Element {
         })}
       </div>
 
-      <p className="plan-note">Contas vencidas de meses anteriores entram no plano da aba Metas.</p>
+      <p className="plan-note">
+        Contas que já venceram não entram na meta do dia, elas têm um plano próprio na aba Metas.
+      </p>
       {editing && (
         <EntryEditForm
           entry={editing}
