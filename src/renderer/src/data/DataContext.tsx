@@ -60,9 +60,10 @@ export function DataProvider({ children }: { children: ReactNode }): React.JSX.E
 
       const bills = current.bills.map((b) => (b.id === id ? { ...b, paidAt: todayISO() } : b))
 
-      // Conta fixa: ao pagar, já cria a do mês seguinte
-      if (bill.recurring) {
-        const nextDueDate = addMonths(bill.dueDate, 1)
+      // Conta fixa: ao pagar, já cria a do mês seguinte (se ainda não passou da data final)
+      const nextDueDate = addMonths(bill.dueDate, 1)
+      const withinEnd = !bill.recurringUntil || nextDueDate <= bill.recurringUntil
+      if (bill.recurring && withinEnd) {
         const alreadyExists = current.bills.some(
           (b) => b.name === bill.name && b.dueDate === nextDueDate
         )
@@ -122,7 +123,13 @@ export function DataProvider({ children }: { children: ReactNode }): React.JSX.E
   const updateBill = (id: string, draft: BillDraft): void => {
     update((current) => ({
       ...current,
-      bills: current.bills.map((b) => (b.id === id ? { ...b, ...draft } : b))
+      bills: current.bills.map((b) => {
+        if (b.id !== id) return b
+        // Se tirou a data final no formulário, ela não fica guardada
+        const { recurringUntil: _old, ...rest } = b
+        void _old
+        return { ...rest, ...draft }
+      })
     }))
   }
 

@@ -6,6 +6,7 @@ export type Bill = {
   dueDate: string // AAAA-MM-DD
   category: string
   recurring: boolean // se repete todo mês
+  recurringUntil?: string // conta fixa: última data em que ela ainda vence (AAAA-MM-DD)
   paidAt: string | null // data em que foi paga, ou null se está em aberto
 }
 

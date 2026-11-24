@@ -2,9 +2,11 @@ import { useEffect, useRef, useState } from 'react'
 import { addMonths, formatDate, parseISO, todayISO, toISO } from '../utils/date'
 
 type Props = {
-  value: string // AAAA-MM-DD
+  value: string // AAAA-MM-DD, ou vazio quando ainda não tem data
   onChange: (value: string) => void
   min?: string
+  placeholder?: string // texto quando está vazio
+  clearLabel?: string // se tiver, mostra um botão para deixar sem data
 }
 
 const monthNames = [
@@ -24,10 +26,18 @@ const monthNames = [
 const weekLetters = ['D', 'S', 'T', 'Q', 'Q', 'S', 'S']
 
 // Calendário com o visual do app, no lugar do calendário padrão do Windows
-export function DatePicker({ value, onChange, min }: Props): React.JSX.Element {
+export function DatePicker({
+  value,
+  onChange,
+  min,
+  placeholder = 'Escolher data',
+  clearLabel
+}: Props): React.JSX.Element {
   const [open, setOpen] = useState(false)
   // Mês que está aparecendo no calendário (sempre dia 01)
-  const [month, setMonth] = useState(`${value.slice(0, 7)}-01`)
+  // Sem data escolhida, o calendário abre no mês da data mínima ou no mês atual
+  const initial = value || min || todayISO()
+  const [month, setMonth] = useState(`${initial.slice(0, 7)}-01`)
   const ref = useRef<HTMLDivElement>(null)
   const today = todayISO()
 
@@ -58,7 +68,7 @@ export function DatePicker({ value, onChange, min }: Props): React.JSX.Element {
   ]
 
   const toggle = (): void => {
-    if (!open) setMonth(`${value.slice(0, 7)}-01`)
+    if (!open) setMonth(`${initial.slice(0, 7)}-01`)
     setOpen(!open)
   }
 
@@ -69,7 +79,9 @@ export function DatePicker({ value, onChange, min }: Props): React.JSX.Element {
         className={`input select-trigger ${open ? 'open' : ''}`}
         onClick={toggle}
       >
-        <span>{formatDate(value)}</span>
+        <span className={value ? '' : 'placeholder'}>
+          {value ? formatDate(value) : placeholder}
+        </span>
         <svg className="select-arrow" viewBox="0 0 16 16" aria-hidden="true">
           <rect
             x="2"
@@ -148,6 +160,19 @@ export function DatePicker({ value, onChange, min }: Props): React.JSX.Element {
           >
             Hoje
           </button>
+
+          {clearLabel && value && (
+            <button
+              type="button"
+              className="calendar-today calendar-clear"
+              onClick={() => {
+                onChange('')
+                setOpen(false)
+              }}
+            >
+              {clearLabel}
+            </button>
+          )}
         </div>
       )}
     </div>

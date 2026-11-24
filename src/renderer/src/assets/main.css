@@ -1496,3 +1496,12 @@ input[type='number']::-webkit-outer-spin-button {
 .photo-actions .link:first-child {
   margin-left: 0;
 }
+
+.select-trigger .placeholder {
+  color: var(--stone);
+}
+
+.calendar-clear {
+  margin-top: 6px;
+  color: var(--stone);
+}

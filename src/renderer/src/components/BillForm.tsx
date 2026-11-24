@@ -1,6 +1,6 @@
 import { FormEvent, useState } from 'react'
 import { Bill, BillDraft } from '../types'
-import { todayISO } from '../utils/date'
+import { formatDate, todayISO } from '../utils/date'
 import { parseAmount } from '../utils/money'
 import { Select } from './Select'
 import { DatePicker } from './DatePicker'
@@ -36,6 +36,7 @@ export function BillForm({ bill, onSave, onClose }: Props): React.JSX.Element {
     bill?.recurring ? 'recurring' : 'single'
   )
   const [installments, setInstallments] = useState('2')
+  const [recurringUntil, setRecurringUntil] = useState(bill?.recurringUntil ?? '')
   const [error, setError] = useState('')
 
   const submit = (event: FormEvent): void => {
@@ -46,11 +47,21 @@ export function BillForm({ bill, onSave, onClose }: Props): React.JSX.Element {
     if (!name.trim()) return setError('Dê um nome para a conta.')
     if (!value || value <= 0) return setError('Digite um valor maior que zero.')
     if (!dueDate) return setError('Escolha a data de vencimento.')
+    if (kind === 'recurring' && recurringUntil && recurringUntil < dueDate)
+      return setError('A data final precisa ser depois do vencimento.')
     if (!Number.isInteger(parts) || parts < 1 || parts > 120)
       return setError('Número de parcelas inválido.')
 
     onSave(
-      { name: name.trim(), amount: value, dueDate, category, recurring: kind === 'recurring' },
+      {
+        name: name.trim(),
+        amount: value,
+        dueDate,
+        category,
+        recurring: kind === 'recurring',
+        // Data final só vale para conta fixa
+        ...(kind === 'recurring' && recurringUntil ? { recurringUntil } : {})
+      },
       parts
     )
   }
@@ -123,6 +134,19 @@ export function BillForm({ bill, onSave, onClose }: Props): React.JSX.Element {
           </div>
         </div>
 
+        {kind === 'recurring' && (
+          <div className="field">
+            <span>Repetir até (opcional)</span>
+            <DatePicker
+              value={recurringUntil}
+              min={dueDate}
+              onChange={setRecurringUntil}
+              placeholder="Sem data final, repete sempre"
+              clearLabel="Sem data final"
+            />
+          </div>
+        )}
+
         {kind === 'installments' && (
           <label className="field">
             <span>Quantas parcelas</span>
@@ -139,7 +163,9 @@ export function BillForm({ bill, onSave, onClose }: Props): React.JSX.Element {
 
         <p className="field-hint">
           {kind === 'recurring' &&
-            'Quando você marcar como paga, a do mês seguinte é criada sozinha.'}
+            (recurringUntil
+              ? `Quando você marcar como paga, a do mês seguinte é criada sozinha, até ${formatDate(recurringUntil)}. Depois disso ela sai das contas e da meta.`
+              : 'Quando você marcar como paga, a do mês seguinte é criada sozinha.')}
           {kind === 'installments' &&
             'Cria uma conta para cada parcela, uma por mês, a partir do vencimento escolhido.'}
         </p>

@@ -29,7 +29,11 @@ export function BillRow({ bill, onPay, onUndo, onEdit, onDelete }: Props): React
       <div className="bill-main">
         <p className="bill-name">
           {bill.name}
-          {bill.recurring && <span className="tag">Fixa</span>}
+          {bill.recurring && (
+            <span className="tag">
+              {bill.recurringUntil ? `Fixa até ${formatDate(bill.recurringUntil)}` : 'Fixa'}
+            </span>
+          )}
         </p>
         <p className="bill-meta">
           {bill.category}
