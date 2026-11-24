@@ -20,6 +20,7 @@ The app starts empty. To see how it works with sample data first, go to **Ajuste
 - **Goals**: personal goals with a deadline and an optional photo, showing how much to set aside per workday. Goals feed the separate goals target on the Today tab
 - **Overdue payoff plan**: choose to pay the smallest or the oldest first, pick a deadline (both are saved) and see how much to set aside per workday and when each overdue bill gets paid off
 - **Add, edit and delete bills**: single, monthly recurring (with an optional end date) or split into installments
+- **Investments**: portfolio with contributions, current value and profit. Stocks, real estate funds (FIIs) and crypto use quotes from brapi (B3 data, about 30 minutes delayed on the free plan), with a green or red arrow showing the change in the last hour. Tesouro Selic and CDB/LCI/LCA are estimated from the daily Selic and CDI rates published by Banco Central. Other investments are updated manually. Includes a compound interest simulator
 - **Reports**: weekly and monthly summary with income, expenses, balance, days the target was hit, a daily balance chart with the daily target, expenses by category and bills paid
 - **Recurring bills**: paying a fixed bill creates next month's one automatically
 - **Windows notifications**: a warning when bills are due in the next 3 days and a stronger one when they are overdue, shown once a day. Clicking it opens the right tab

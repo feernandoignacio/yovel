@@ -117,6 +117,29 @@ export function SettingsPage(): React.JSX.Element {
         </div>
       </div>
 
+      <h2 className="section-title">Investimentos</h2>
+      <div className="settings-box">
+        <p className="settings-text">
+          As cotações de ações, fundos imobiliários e cripto vêm da brapi, que repassa os dados da
+          B3. O plano gratuito atualiza de 30 em 30 minutos. Sem chave, só funcionam PETR4, VALE3,
+          MGLU3 e ITUB4. Para os outros, crie uma conta grátis em{' '}
+          <a href="https://brapi.dev/dashboard" target="_blank" rel="noreferrer">
+            brapi.dev
+          </a>
+          , copie a chave (token) e cole aqui. Tesouro Selic e CDB não precisam de chave.
+        </p>
+        <label className="field">
+          <span>Chave da brapi</span>
+          <input
+            className="input"
+            type="password"
+            placeholder="Cole a chave aqui"
+            value={data.settings.brapiToken ?? ''}
+            onChange={(e) => updateSettings({ brapiToken: e.target.value.trim() })}
+          />
+        </label>
+      </div>
+
       <h2 className="section-title">Categorias</h2>
       <div className="settings-box">
         <p className="settings-text">

@@ -1,5 +1,15 @@
 import { createContext, ReactNode, useContext, useEffect, useState } from 'react'
-import { AppData, Bill, BillDraft, Entry, GoalDraft, Settings } from '../types'
+import {
+  AppData,
+  Bill,
+  BillDraft,
+  Contribution,
+  Entry,
+  GoalDraft,
+  InvestmentDraft,
+  MarketCache,
+  Settings
+} from '../types'
 import { categoriesOf, createEmptyData } from './sample'
 import { addMonths, todayISO } from '../utils/date'
 import { createId, DUE_SOON_DAYS, setDueSoonDays } from '../utils/bills'
@@ -23,6 +33,11 @@ type DataContextValue = {
   renameCategory: (type: Entry['type'], from: string, to: string) => void
   updateEntry: (id: string, entry: Omit<Entry, 'id'>) => void
   updateSettings: (changes: Partial<Settings>) => void
+  addInvestment: (draft: InvestmentDraft, first: Omit<Contribution, 'id'> | null) => void
+  updateInvestment: (id: string, draft: InvestmentDraft) => void
+  deleteInvestment: (id: string) => void
+  addContribution: (id: string, contribution: Omit<Contribution, 'id'>) => void
+  updateMarket: (change: (market: MarketCache) => MarketCache) => void
 }
 
 const DataContext = createContext<DataContextValue | null>(null)
@@ -186,6 +201,48 @@ export function DataProvider({ children }: { children: ReactNode }): React.JSX.E
     update((current) => ({ ...current, settings: { ...current.settings, ...changes } }))
   }
 
+  const addInvestment = (draft: InvestmentDraft, first: Omit<Contribution, 'id'> | null): void => {
+    update((current) => ({
+      ...current,
+      investments: [
+        ...(current.investments ?? []),
+        { ...draft, id: createId(), contributions: first ? [{ ...first, id: createId() }] : [] }
+      ]
+    }))
+  }
+
+  const updateInvestment = (id: string, draft: InvestmentDraft): void => {
+    update((current) => ({
+      ...current,
+      investments: (current.investments ?? []).map((i) =>
+        i.id === id ? { ...draft, id, contributions: i.contributions } : i
+      )
+    }))
+  }
+
+  const deleteInvestment = (id: string): void => {
+    update((current) => ({
+      ...current,
+      investments: (current.investments ?? []).filter((i) => i.id !== id)
+    }))
+  }
+
+  const addContribution = (id: string, contribution: Omit<Contribution, 'id'>): void => {
+    update((current) => ({
+      ...current,
+      investments: (current.investments ?? []).map((i) =>
+        i.id === id
+          ? { ...i, contributions: [...i.contributions, { ...contribution, id: createId() }] }
+          : i
+      )
+    }))
+  }
+
+  // Guarda cotações e taxas buscadas na internet
+  const updateMarket = (change: (market: MarketCache) => MarketCache): void => {
+    update((current) => ({ ...current, market: change(current.market ?? { quotes: {} }) }))
+  }
+
   const setCategories = (type: Entry['type'], categories: string[]): void => {
     const key = type === 'income' ? 'incomeCategories' : 'expenseCategories'
     update((current) => ({ ...current, settings: { ...current.settings, [key]: categories } }))
@@ -226,7 +283,12 @@ export function DataProvider({ children }: { children: ReactNode }): React.JSX.E
         setCategories,
         renameCategory,
         updateEntry,
-        updateSettings
+        updateSettings,
+        addInvestment,
+        updateInvestment,
+        deleteInvestment,
+        addContribution,
+        updateMarket
       }}
     >
       {children}

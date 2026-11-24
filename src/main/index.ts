@@ -5,6 +5,7 @@ import icon from '../../resources/icon.png?asset'
 import { loadData, saveData } from './storage'
 import { checkBills, NotifyTarget, startBillChecks } from './notifications'
 import { exportBackup, importBackup } from './backup'
+import { fetchQuotes, fetchRates } from './market'
 import { checkForUpdatesNow, getUpdateStatus, installUpdate, setupUpdater } from './updater'
 
 let mainWindow: BrowserWindow | null = null
@@ -133,6 +134,14 @@ if (!app.requestSingleInstanceLock()) {
     ipcMain.handle('backup:export', (_event, data: unknown) => exportBackup(mainWindow, data))
     ipcMain.handle('backup:import', () => importBackup(mainWindow))
     ipcMain.handle('app:version', () => app.getVersion())
+    ipcMain.handle(
+      'market:quotes',
+      (_event, items: { ticker: string; crypto: boolean }[], token?: string) =>
+        fetchQuotes(items, token)
+    )
+    ipcMain.handle('market:rates', (_event, series: 'selic' | 'cdi', from: string) =>
+      fetchRates(series, from)
+    )
     ipcMain.handle('update:get', () => getUpdateStatus())
     ipcMain.handle('update:install', () => {
       isQuitting = true

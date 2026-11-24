@@ -1,6 +1,6 @@
 import logo from '../assets/rign-logo.svg'
 
-export type Page = 'today' | 'bills' | 'overdue' | 'goals' | 'reports' | 'settings'
+export type Page = 'today' | 'bills' | 'overdue' | 'goals' | 'investments' | 'reports' | 'settings'
 
 type Props = {
   current: Page
@@ -14,6 +14,7 @@ const items: { page: Page; label: string }[] = [
   { page: 'bills', label: 'Contas em dia' },
   { page: 'overdue', label: 'Vencidas' },
   { page: 'goals', label: 'Metas' },
+  { page: 'investments', label: 'Investimentos' },
   { page: 'reports', label: 'Balanço' }
 ]
 

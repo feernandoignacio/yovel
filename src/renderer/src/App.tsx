@@ -7,6 +7,7 @@ import { TodayPage } from './pages/TodayPage'
 import { GoalsPage } from './pages/GoalsPage'
 import { ReportsPage } from './pages/ReportsPage'
 import { SettingsPage } from './pages/SettingsPage'
+import { InvestmentsPage } from './pages/InvestmentsPage'
 import { UpdateBanner } from './components/UpdateBanner'
 import { billStatus } from './utils/bills'
 
@@ -54,6 +55,7 @@ function App(): React.JSX.Element {
         {page === 'goals' && <GoalsPage />}
         {page === 'reports' && <ReportsPage />}
         {page === 'settings' && <SettingsPage />}
+        {page === 'investments' && <InvestmentsPage />}
       </main>
     </div>
   )

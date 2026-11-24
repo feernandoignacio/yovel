@@ -47,6 +47,62 @@ export type Settings = {
   // Escolhas do plano para quitar as vencidas
   payoffStrategy?: 'smallest' | 'oldest'
   payoffDeadline?: string
+  // Chave da brapi (cotações da B3 e cripto)
+  brapiToken?: string
+}
+
+// Tipos de investimento e como cada um é atualizado
+export type InvestmentKind =
+  | 'stock' // ação, cotação B3
+  | 'fii' // fundo imobiliário, cotação B3
+  | 'crypto' // cripto, cotação em reais
+  | 'selic' // Tesouro Selic, calculado pela taxa Selic do Banco Central
+  | 'cdi' // CDB, LCI, LCA, calculado por % do CDI
+  | 'manual' // qualquer outro, valor atualizado na mão
+
+// Aporte: dinheiro colocado no investimento
+export type Contribution = {
+  id: string
+  date: string // AAAA-MM-DD
+  amount: number
+  quantity?: number // cotas ou moedas compradas (ação, fundo imobiliário, cripto)
+}
+
+export type Investment = {
+  id: string
+  name: string
+  kind: InvestmentKind
+  institution?: string // banco ou corretora
+  ticker?: string // código, ex: PETR4, MXRF11, BTC
+  cdiPercent?: number // ex: 100 para 100% do CDI
+  manualValue?: number // valor atual informado na mão
+  manualUpdatedAt?: string
+  contributions: Contribution[]
+}
+
+export type InvestmentDraft = Omit<Investment, 'id' | 'contributions'>
+
+// Preço guardado num momento, para calcular a variação da última hora
+export type PricePoint = { at: number; price: number }
+
+export type QuoteCache = {
+  price: number
+  dayChange: number | null // variação do dia em %, quando o serviço informa
+  history: PricePoint[]
+  updatedAt: number
+}
+
+// Taxa de um dia útil, em % ao dia (Banco Central)
+export type RatePoint = { date: string; rate: number }
+
+// Últimos valores buscados na internet, para mostrar mesmo sem conexão
+export type MarketCache = {
+  quotes: Record<string, QuoteCache>
+  selic?: RatePoint[]
+  cdi?: RatePoint[]
+  ratesUpdatedAt?: number
+  quotesUpdatedAt?: number
+  error?: string
 }
 
 export type AppData = {
@@ -55,5 +111,7 @@ export type AppData = {
   entries: Entry[]
   goals: Goal[]
   settings: Settings
+  investments?: Investment[]
+  market?: MarketCache
   sample?: boolean // true enquanto o app estiver com os dados de exemplo
 }

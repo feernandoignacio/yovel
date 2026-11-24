@@ -1,6 +1,7 @@
 import { contextBridge, ipcRenderer } from 'electron'
 import { electronAPI } from '@electron-toolkit/preload'
 import type { UpdateStatus } from '../main/updater'
+import type { QuoteResult, RateResult } from '../main/market'
 
 // Funções que a tela pode chamar para ler e salvar os dados
 const api = {
@@ -9,6 +10,13 @@ const api = {
   exportBackup: (data: unknown): Promise<boolean> => ipcRenderer.invoke('backup:export', data),
   importBackup: (): Promise<unknown | null> => ipcRenderer.invoke('backup:import'),
   getVersion: (): Promise<string> => ipcRenderer.invoke('app:version'),
+  // Cotações (brapi) e taxas Selic e CDI (Banco Central)
+  fetchQuotes: (
+    items: { ticker: string; crypto: boolean }[],
+    token?: string
+  ): Promise<QuoteResult[]> => ipcRenderer.invoke('market:quotes', items, token),
+  fetchRates: (series: 'selic' | 'cdi', from: string): Promise<RateResult[]> =>
+    ipcRenderer.invoke('market:rates', series, from),
   getUpdateStatus: (): Promise<UpdateStatus> => ipcRenderer.invoke('update:get'),
   installUpdate: (): Promise<void> => ipcRenderer.invoke('update:install'),
   onUpdateStatus: (callback: (status: UpdateStatus) => void): (() => void) => {

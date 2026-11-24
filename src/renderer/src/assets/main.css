@@ -1505,3 +1505,230 @@ input[type='number']::-webkit-outer-spin-button {
   margin-top: 6px;
   color: var(--stone);
 }
+
+/* Aba Investimentos */
+.notes {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-bottom: 20px;
+  max-width: 980px;
+}
+
+.note {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: var(--offwhite);
+  border: 1px dashed var(--stone-light);
+  border-radius: 8px;
+  padding: 9px 12px;
+  font-size: 12px;
+  color: var(--stone);
+}
+
+.note svg {
+  width: 15px;
+  height: 15px;
+  flex-shrink: 0;
+}
+
+.note-warning {
+  border-style: solid;
+  border-color: var(--mustard);
+  background: var(--mustard-bg);
+  color: #6e5710;
+}
+
+.portfolio {
+  background: var(--offwhite);
+  border-radius: 12px;
+  padding: 18px 20px;
+  margin-bottom: 8px;
+}
+
+.portfolio-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 20px;
+}
+
+.portfolio-total {
+  font-size: 28px;
+  font-weight: 700;
+  margin: 6px 0 4px;
+}
+
+.portfolio-side {
+  text-align: right;
+  font-size: 12px;
+  color: var(--stone);
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 3px;
+}
+
+.portfolio-side strong {
+  color: var(--charcoal);
+}
+
+.portfolio-side strong.positive {
+  color: var(--green);
+}
+
+.portfolio-side strong.negative {
+  color: var(--red);
+}
+
+.portfolio-time {
+  margin-top: 6px;
+  font-size: 11px;
+}
+
+.portfolio-side .link {
+  margin-left: 0;
+}
+
+.portfolio-list {
+  margin-top: 14px;
+  border-top: 1px solid var(--sand-dark);
+}
+
+.portfolio-row {
+  display: grid;
+  grid-template-columns: 1fr 150px 120px 70px;
+  gap: 14px;
+  align-items: center;
+  padding: 11px 0;
+  border-bottom: 1px solid var(--sand-dark);
+}
+
+.portfolio-name {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  background: none;
+  border: none;
+  padding: 0;
+  text-align: left;
+  color: var(--charcoal);
+}
+
+.portfolio-name:hover .bill-name {
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+.portfolio-value {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  font-size: 12px;
+}
+
+.portfolio-value strong {
+  font-size: 14px;
+}
+
+.portfolio .plan-info {
+  margin: 12px 0 0;
+}
+
+/* Setinha de variação */
+.change {
+  display: inline-flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 4px;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.change svg {
+  width: 12px;
+  height: 12px;
+}
+
+.change-up {
+  color: var(--green);
+}
+
+.change-down {
+  color: var(--red);
+}
+
+.change-flat,
+.change-none {
+  color: var(--stone);
+  font-weight: 500;
+  font-size: 12px;
+}
+
+.change-period {
+  font-weight: 500;
+  color: var(--stone);
+  font-size: 12px;
+}
+
+.change-period-small {
+  font-size: 10px;
+}
+
+.contribution-list {
+  font-size: 12px;
+  color: var(--stone);
+  line-height: 1.7;
+  max-height: 120px;
+  overflow-y: auto;
+}
+
+.modal-left {
+  margin-right: auto;
+}
+
+/* Simulador */
+.simulator {
+  background: var(--offwhite);
+  border-radius: 12px;
+  padding: 18px 20px;
+}
+
+.simulator-inputs {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr) 1.4fr;
+  gap: 12px;
+  align-items: end;
+  margin-bottom: 14px;
+}
+
+.simulator-result {
+  text-align: right;
+}
+
+.swatch-stone {
+  background: var(--stone);
+}
+
+.swatch-mustard {
+  background: var(--mustard);
+}
+
+.bar-stone {
+  fill: var(--stone);
+}
+
+.bar-mustard {
+  fill: var(--mustard);
+}
+
+.settings-text a {
+  color: var(--charcoal);
+  font-weight: 600;
+}
+
+/* Lista dentro da nota do fim da página */
+.plan-note ul {
+  margin: 4px 0 0 18px;
+}
