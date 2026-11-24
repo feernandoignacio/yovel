@@ -675,6 +675,20 @@ button {
 .goal-card {
   background: var(--offwhite);
   border-radius: var(--radius);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Foto do objetivo: ocupa toda a largura do cartão, sem sobra nas laterais */
+.goal-image {
+  display: block;
+  width: 100%;
+  height: 144px;
+  object-fit: cover;
+}
+
+.goal-body {
   padding: 20px;
   display: flex;
   flex-direction: column;
@@ -1431,4 +1445,37 @@ input[type='number']::-webkit-outer-spin-button {
 
 .share-row strong {
   text-align: right;
+}
+
+/* Foto no formulário de meta */
+.photo-pick {
+  border: 1px dashed var(--stone-light);
+  border-radius: 8px;
+  background: transparent;
+  color: var(--stone);
+  padding: 18px;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.photo-pick:hover {
+  border-color: var(--charcoal);
+  color: var(--charcoal);
+}
+
+.photo-preview img {
+  display: block;
+  width: 100%;
+  height: 120px;
+  object-fit: cover;
+  border-radius: 8px;
+}
+
+.photo-actions {
+  display: flex;
+  margin-top: 6px;
+}
+
+.photo-actions .link:first-child {
+  margin-left: 0;
 }

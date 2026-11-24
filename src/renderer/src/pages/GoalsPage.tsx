@@ -72,77 +72,80 @@ export function GoalsPage(): React.JSX.Element {
 
             return (
               <div key={goal.id} className={`goal-card ${done ? 'done' : ''}`}>
-                <div className="goal-top">
-                  <p className="bill-name">{goal.name}</p>
-                  <p className="bill-meta">
-                    até {formatDate(goal.deadline)}
-                    {!done && daysLeft >= 0 && ` · faltam ${daysLeft} dias`}
-                    {!done && daysLeft < 0 && ' · prazo passou'}
+                {goal.image && <img className="goal-image" src={goal.image} alt="" />}
+                <div className="goal-body">
+                  <div className="goal-top">
+                    <p className="bill-name">{goal.name}</p>
+                    <p className="bill-meta">
+                      até {formatDate(goal.deadline)}
+                      {!done && daysLeft >= 0 && ` · faltam ${daysLeft} dias`}
+                      {!done && daysLeft < 0 && ' · prazo passou'}
+                    </p>
+                  </div>
+
+                  <p className="goal-values">
+                    <strong>{formatMoney(goal.saved)}</strong> de {formatMoney(goal.target)}
                   </p>
-                </div>
-
-                <p className="goal-values">
-                  <strong>{formatMoney(goal.saved)}</strong> de {formatMoney(goal.target)}
-                </p>
-                <div className="progress">
-                  <div
-                    className={`progress-bar ${done ? 'done' : ''}`}
-                    style={{ width: `${percent}%` }}
-                  />
-                </div>
-
-                <p className="card-hint">
-                  {done
-                    ? 'Meta alcançada.'
-                    : daysLeft < 0
-                      ? `Faltam ${formatMoney(missing)}. Ajuste o prazo para voltar a calcular.`
-                      : `Faltam ${formatMoney(missing)}. Separe ${formatMoney(perDay)} por dia de trabalho.`}
-                </p>
-
-                {depositFor === goal.id ? (
-                  <div className="goal-deposit">
-                    <input
-                      className="input"
-                      autoFocus
-                      inputMode="decimal"
-                      placeholder="R$ 0,00"
-                      value={depositValue}
-                      onChange={(e) => setDepositValue(e.target.value)}
-                      onKeyDown={(e) => e.key === 'Enter' && saveDeposit(goal.id)}
+                  <div className="progress">
+                    <div
+                      className={`progress-bar ${done ? 'done' : ''}`}
+                      style={{ width: `${percent}%` }}
                     />
-                    <button className="btn" onClick={() => saveDeposit(goal.id)}>
-                      Guardar
-                    </button>
-                    <button className="btn btn-ghost" onClick={() => setDepositFor(null)}>
-                      Cancelar
-                    </button>
                   </div>
-                ) : (
-                  <div className="goal-actions">
-                    {!done && (
-                      <button className="btn" onClick={() => setDepositFor(goal.id)}>
-                        Guardar valor
+
+                  <p className="card-hint">
+                    {done
+                      ? 'Meta alcançada.'
+                      : daysLeft < 0
+                        ? `Faltam ${formatMoney(missing)}. Ajuste o prazo para voltar a calcular.`
+                        : `Faltam ${formatMoney(missing)}. Separe ${formatMoney(perDay)} por dia de trabalho.`}
+                  </p>
+
+                  {depositFor === goal.id ? (
+                    <div className="goal-deposit">
+                      <input
+                        className="input"
+                        autoFocus
+                        inputMode="decimal"
+                        placeholder="R$ 0,00"
+                        value={depositValue}
+                        onChange={(e) => setDepositValue(e.target.value)}
+                        onKeyDown={(e) => e.key === 'Enter' && saveDeposit(goal.id)}
+                      />
+                      <button className="btn" onClick={() => saveDeposit(goal.id)}>
+                        Guardar
                       </button>
-                    )}
-                    <button className="link" onClick={() => setForm({ goal })}>
-                      Editar
-                    </button>
-                    {confirmDelete === goal.id ? (
-                      <>
-                        <button className="link link-danger" onClick={() => deleteGoal(goal.id)}>
-                          Confirmar exclusão
-                        </button>
-                        <button className="link" onClick={() => setConfirmDelete(null)}>
-                          Cancelar
-                        </button>
-                      </>
-                    ) : (
-                      <button className="link" onClick={() => setConfirmDelete(goal.id)}>
-                        Apagar
+                      <button className="btn btn-ghost" onClick={() => setDepositFor(null)}>
+                        Cancelar
                       </button>
-                    )}
-                  </div>
-                )}
+                    </div>
+                  ) : (
+                    <div className="goal-actions">
+                      {!done && (
+                        <button className="btn" onClick={() => setDepositFor(goal.id)}>
+                          Guardar valor
+                        </button>
+                      )}
+                      <button className="link" onClick={() => setForm({ goal })}>
+                        Editar
+                      </button>
+                      {confirmDelete === goal.id ? (
+                        <>
+                          <button className="link link-danger" onClick={() => deleteGoal(goal.id)}>
+                            Confirmar exclusão
+                          </button>
+                          <button className="link" onClick={() => setConfirmDelete(null)}>
+                            Cancelar
+                          </button>
+                        </>
+                      ) : (
+                        <button className="link" onClick={() => setConfirmDelete(goal.id)}>
+                          Apagar
+                        </button>
+                      )}
+                    </div>
+                  )}
+                </div>
               </div>
             )
           })}

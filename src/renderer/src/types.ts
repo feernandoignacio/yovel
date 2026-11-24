@@ -29,6 +29,7 @@ export type Goal = {
   target: number
   saved: number
   deadline: string // AAAA-MM-DD
+  image?: string // foto do objetivo, já reduzida, guardada como data URL
 }
 
 // Dados da meta preenchidos no formulário

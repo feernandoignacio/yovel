@@ -1,7 +1,8 @@
-import { FormEvent, useState } from 'react'
+import { ChangeEvent, FormEvent, useRef, useState } from 'react'
 import { Goal, GoalDraft } from '../types'
 import { addMonths, todayISO } from '../utils/date'
 import { parseAmount } from '../utils/money'
+import { resizeImage } from '../utils/image'
 import { DatePicker } from './DatePicker'
 
 type Props = {
@@ -21,7 +22,22 @@ export function GoalForm({ goal, initial, onSave, onClose }: Props): React.JSX.E
   const [target, setTarget] = useState(start?.target ? amountToText(start.target) : '')
   const [saved, setSaved] = useState(start?.saved ? amountToText(start.saved) : '')
   const [deadline, setDeadline] = useState(start?.deadline ?? addMonths(todayISO(), 3))
+  const [image, setImage] = useState<string | undefined>(start?.image)
   const [error, setError] = useState('')
+  const fileInput = useRef<HTMLInputElement>(null)
+
+  const pickImage = async (event: ChangeEvent<HTMLInputElement>): Promise<void> => {
+    const file = event.target.files?.[0]
+    event.target.value = ''
+    if (!file) return
+    if (!file.type.startsWith('image/')) return setError('Escolha um arquivo de imagem.')
+    try {
+      setImage(await resizeImage(file))
+      setError('')
+    } catch {
+      setError('Não foi possível abrir essa imagem. Tente outra.')
+    }
+  }
 
   const submit = (event: FormEvent): void => {
     event.preventDefault()
@@ -33,7 +49,7 @@ export function GoalForm({ goal, initial, onSave, onClose }: Props): React.JSX.E
     if (Number.isNaN(savedValue) || savedValue < 0) return setError('Valor guardado inválido.')
     if (!deadline || deadline < todayISO()) return setError('O prazo precisa ser hoje ou depois.')
 
-    onSave({ name: name.trim(), target: targetValue, saved: savedValue, deadline })
+    onSave({ name: name.trim(), target: targetValue, saved: savedValue, deadline, image })
   }
 
   return (
@@ -79,6 +95,28 @@ export function GoalForm({ goal, initial, onSave, onClose }: Props): React.JSX.E
         <div className="field">
           <span>Prazo</span>
           <DatePicker value={deadline} onChange={setDeadline} />
+        </div>
+
+        <div className="field">
+          <span>Foto (opcional)</span>
+          <input ref={fileInput} type="file" accept="image/*" hidden onChange={pickImage} />
+          {image ? (
+            <div className="photo-preview">
+              <img src={image} alt="" />
+              <div className="photo-actions">
+                <button type="button" className="link" onClick={() => fileInput.current?.click()}>
+                  Trocar foto
+                </button>
+                <button type="button" className="link" onClick={() => setImage(undefined)}>
+                  Tirar foto
+                </button>
+              </div>
+            </div>
+          ) : (
+            <button type="button" className="photo-pick" onClick={() => fileInput.current?.click()}>
+              Escolher foto do computador
+            </button>
+          )}
         </div>
 
         <p className="field-hint">

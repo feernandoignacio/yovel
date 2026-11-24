@@ -17,7 +17,7 @@ The app starts empty. To see how it works with sample data first, go to **Ajuste
 - **Today**: log income and expenses for each day. Each bill starts counting 30 days before its due date (or today, if it is already that close) and asks for what is still missing divided by the workdays until it is due. The daily target is the sum of those amounts, and the list of bills shows how much each one asks per day. Money earned goes into each bill's envelope in proportion; anything above the target goes to the bill that is due first. If a day falls short, the difference is spread over the days left for each bill. Entries can be edited or deleted. Goals have a separate target, so they never feel like an obligation
 - **Bills up to date**: open bills sorted by due date, with a warning when a bill is due in the next 3 days
 - **Overdue**: bills move here automatically once the due date passes, with the total owed
-- **Goals**: personal goals with a deadline, showing how much to set aside per workday. Goals feed the separate goals target on the Today tab
+- **Goals**: personal goals with a deadline and an optional photo, showing how much to set aside per workday. Goals feed the separate goals target on the Today tab
 - **Overdue payoff plan**: choose to pay the smallest or the oldest first, pick a deadline (both are saved) and see how much to set aside per workday and when each overdue bill gets paid off
 - **Add, edit and delete bills**: single, monthly recurring or split into installments
 - **Reports**: weekly and monthly summary with income, expenses, balance, days the target was hit, a daily balance chart with the daily target, expenses by category and bills paid
