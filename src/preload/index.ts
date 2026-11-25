@@ -5,6 +5,7 @@ import type { QuoteResult, RateResult } from '../main/market'
 
 // Funções que a tela pode chamar para ler e salvar os dados
 const api = {
+  platform: 'desktop' as const,
   loadData: (): Promise<unknown> => ipcRenderer.invoke('data:load'),
   saveData: (data: unknown): Promise<void> => ipcRenderer.invoke('data:save', data),
   exportBackup: (data: unknown): Promise<boolean> => ipcRenderer.invoke('backup:export', data),

@@ -8,6 +8,12 @@ import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
 import App from './App'
 import { DataProvider } from './data/DataContext'
+import { createWebApi } from './web/webApi'
+
+// Fora do app de desktop (versão online), usa a ponte do navegador
+if (!('api' in window)) {
+  ;(window as Window).api = createWebApi()
+}
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>

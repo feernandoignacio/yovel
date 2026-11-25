@@ -30,6 +30,7 @@ export function SettingsPage(): React.JSX.Element {
   const [confirm, setConfirm] = useState<Confirm>(null)
   const [message, setMessage] = useState<Message>(null)
   const [version, setVersion] = useState('')
+  const isWeb = window.api.platform === 'web'
 
   useEffect(() => {
     window.api.getVersion().then(setVersion)
@@ -104,8 +105,9 @@ export function SettingsPage(): React.JSX.Element {
       <div className="settings-box">
         <div className="settings-row">
           <p className="settings-text">
-            Com quantos dias de antecedência a conta fica amarela e aparece o aviso do Windows de
-            que vai vencer.
+            {isWeb
+              ? 'Com quantos dias de antecedência a conta fica amarela e entra no contador de vence em breve.'
+              : 'Com quantos dias de antecedência a conta fica amarela e aparece o aviso do Windows de que vai vencer.'}
           </p>
           <div className="settings-select">
             <Select
@@ -153,8 +155,9 @@ export function SettingsPage(): React.JSX.Element {
       <h2 className="section-title">Backup</h2>
       <div className="settings-box">
         <p className="settings-text">
-          Seus dados ficam só neste computador. Salve uma cópia de vez em quando num pendrive ou na
-          nuvem, para não perder nada se o PC der problema.
+          {isWeb
+            ? 'Na versão online, seus dados ficam salvos só neste navegador, neste computador. Se os dados do navegador forem limpos, eles somem. Salve uma cópia de vez em quando para não perder nada.'
+            : 'Seus dados ficam só neste computador. Salve uma cópia de vez em quando num pendrive ou na nuvem, para não perder nada se o PC der problema.'}
         </p>
         <div className="settings-actions">
           <button className="btn" onClick={exportBackup}>
@@ -218,8 +221,10 @@ export function SettingsPage(): React.JSX.Element {
         </div>
       </div>
       <p className="app-version">
-        Operação Yovel {version && `versão ${version}`}. O app procura atualizações sozinho quando
-        abre.
+        Operação Yovel {version && `versão ${version}`}.{' '}
+        {isWeb
+          ? 'Versão online: sempre abre na versão mais nova.'
+          : 'O app procura atualizações sozinho quando abre.'}
       </p>
     </section>
   )

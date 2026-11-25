@@ -12,6 +12,15 @@ The app is not code signed, so Windows may show "Windows protected your PC" when
 
 The app starts empty. To see how it works with sample data first, go to **Ajustes** and click **Carregar exemplo**.
 
+## Online version
+
+There is also a browser version of the same app, published on Vercel, for computers where installing programs is not allowed. In the browser, data is saved in that browser only (localStorage). Windows notifications, the tray icon and automatic updates exist only in the desktop app. Stock and rate lookups go through two small Vercel functions in the `api` folder.
+
+```bash
+npm run dev:web     # run the online version locally
+npm run build:web   # build it into dist-web
+```
+
 ## Features
 
 - **Today**: log income and expenses for each day. Each bill starts counting 30 days before its due date (or today, if it is already that close) and asks for what is still missing divided by the workdays until it is due. The daily target is the sum of those amounts, and the list of bills shows how much each one asks per day. Money earned goes into each bill's envelope in proportion; anything above the target goes to the bill that is due first. If a day falls short, the difference is spread over the days left for each bill. Entries can be edited or deleted. Goals have a separate target, so they never feel like an obligation

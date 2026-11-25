@@ -9,6 +9,7 @@ declare global {
   interface Window {
     electron: ElectronAPI
     api: {
+      platform: 'desktop' | 'web'
       loadData: () => Promise<unknown>
       saveData: (data: unknown) => Promise<void>
       exportBackup: (data: unknown) => Promise<boolean>
