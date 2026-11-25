@@ -63,6 +63,20 @@ export function defaultSettings(): Settings {
   }
 }
 
+// Lista padrão antiga. Quem nunca mexeu nela recebe a nova ao abrir o app
+const oldIncomeCategories = ['Corridas', 'Gorjeta', 'Freela', 'Outros']
+
+// Ajusta dados salvos por versões anteriores
+export function migrateData(data: AppData): AppData {
+  const income = data.settings.incomeCategories
+  const untouched =
+    !!income &&
+    income.length === oldIncomeCategories.length &&
+    income.every((c, i) => c === oldIncomeCategories[i])
+  if (!untouched) return data
+  return { ...data, settings: { ...data.settings, incomeCategories: [...defaultIncomeCategories] } }
+}
+
 // Categorias salvas ou, se ainda não tiver, as padrão
 export function categoriesOf(settings: Settings, type: 'income' | 'expense'): string[] {
   const saved = type === 'income' ? settings.incomeCategories : settings.expenseCategories
