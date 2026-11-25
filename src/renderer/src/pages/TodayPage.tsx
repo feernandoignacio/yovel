@@ -154,8 +154,8 @@ export function TodayPage(): React.JSX.Element {
       {plan.target > 0 && dayEntries.length > 0 && plan.nextTarget !== null && (
         <div className={`alert ${plan.difference >= 0 ? 'alert-success' : 'alert-warning'}`}>
           {plan.difference >= 0
-            ? `Passou ${formatMoney(plan.difference)} da meta. Se fechar o dia assim, a meta dos próximos dias cai para ${formatMoney(plan.nextTarget)}.`
-            : `Se fechar o dia assim, os ${formatMoney(-plan.difference)} que faltaram vão ser divididos nos próximos dias e a meta sobe para ${formatMoney(plan.nextTarget)}.`}
+            ? `Passou ${formatMoney(plan.difference)} da meta. Se fechar o dia assim, a meta de amanhã ${plan.nextTarget < plan.target ? 'cai para' : 'fica em'} ${formatMoney(plan.nextTarget)}.`
+            : `Se fechar o dia assim, os ${formatMoney(-plan.difference)} que faltaram vão ser divididos nos próximos dias e a meta de amanhã ${plan.nextTarget > plan.target ? 'sobe para' : 'fica em'} ${formatMoney(plan.nextTarget)}.`}
         </div>
       )}
 
