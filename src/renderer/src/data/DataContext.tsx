@@ -10,7 +10,7 @@ import {
   MarketCache,
   Settings
 } from '../types'
-import { categoriesOf, createEmptyData } from './sample'
+import { categoriesOf, createEmptyData, migrateData } from './sample'
 import { addMonths, todayISO } from '../utils/date'
 import { createId, DUE_SOON_DAYS, setDueSoonDays } from '../utils/bills'
 
@@ -48,7 +48,7 @@ export function DataProvider({ children }: { children: ReactNode }): React.JSX.E
   // Carrega o arquivo ao abrir o app. Na primeira vez começa limpo
   useEffect(() => {
     window.api.loadData().then((saved) => {
-      setData((saved as AppData | null) ?? createEmptyData())
+      setData(saved ? migrateData(saved as AppData) : createEmptyData())
     })
   }, [])
 
