@@ -46,7 +46,7 @@ export function createSampleData(): AppData {
   }
 }
 
-export const defaultIncomeCategories = ['Corridas', 'Gorjeta', 'Freela', 'Outros']
+export const defaultIncomeCategories = ['Projetos', 'Freela', 'Outros']
 export const defaultExpenseCategories = [
   'Combustível',
   'Alimentação',
