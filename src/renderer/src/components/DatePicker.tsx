@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useLayoutEffect, useRef, useState } from 'react'
 import { addMonths, formatDate, parseISO, todayISO, toISO } from '../utils/date'
 
 type Props = {
@@ -39,7 +39,20 @@ export function DatePicker({
   const initial = value || min || todayISO()
   const [month, setMonth] = useState(`${initial.slice(0, 7)}-01`)
   const ref = useRef<HTMLDivElement>(null)
+  const calendarRef = useRef<HTMLDivElement>(null)
   const today = todayISO()
+
+  // Se não couber embaixo do campo, o calendário abre para cima
+  useLayoutEffect(() => {
+    const calendar = calendarRef.current
+    if (!open || !calendar || !ref.current) return
+    calendar.classList.remove('up')
+    const field = ref.current.getBoundingClientRect()
+    const height = calendar.offsetHeight + 6
+    const below = window.innerHeight - field.bottom
+    const above = field.top
+    if (below < height && above > below) calendar.classList.add('up')
+  }, [open, month, value])
 
   useEffect(() => {
     if (!open) return
@@ -98,7 +111,7 @@ export function DatePicker({
       </button>
 
       {open && (
-        <div className="calendar">
+        <div className="calendar" ref={calendarRef}>
           <div className="calendar-head">
             <button
               type="button"

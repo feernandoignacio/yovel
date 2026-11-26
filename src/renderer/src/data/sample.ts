@@ -46,7 +46,7 @@ export function createSampleData(): AppData {
   }
 }
 
-export const defaultIncomeCategories = ['Projetos', 'Freela', 'Outros']
+export const defaultIncomeCategories = ['Salário', 'Bônus', 'Projetos', 'Freela', 'Outros']
 export const defaultExpenseCategories = [
   'Combustível',
   'Alimentação',
@@ -63,16 +63,19 @@ export function defaultSettings(): Settings {
   }
 }
 
-// Lista padrão antiga. Quem nunca mexeu nela recebe a nova ao abrir o app
-const oldIncomeCategories = ['Corridas', 'Gorjeta', 'Freela', 'Outros']
+// Listas padrão antigas. Quem nunca mexeu nelas recebe a atual ao abrir o app
+const oldIncomeCategories = [
+  ['Corridas', 'Gorjeta', 'Freela', 'Outros'],
+  ['Projetos', 'Freela', 'Outros']
+]
+
+const sameList = (a: string[], b: string[]): boolean =>
+  a.length === b.length && a.every((c, i) => c === b[i])
 
 // Ajusta dados salvos por versões anteriores
 export function migrateData(data: AppData): AppData {
   const income = data.settings.incomeCategories
-  const untouched =
-    !!income &&
-    income.length === oldIncomeCategories.length &&
-    income.every((c, i) => c === oldIncomeCategories[i])
+  const untouched = !!income && oldIncomeCategories.some((old) => sameList(income, old))
   if (!untouched) return data
   return { ...data, settings: { ...data.settings, incomeCategories: [...defaultIncomeCategories] } }
 }
