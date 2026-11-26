@@ -10,6 +10,7 @@ type Props = {
   onUndo?: () => void
   onEdit?: () => void
   onDelete?: () => void
+  canPay?: boolean // o dinheiro disponível já cobre essa conta
 }
 
 const statusLabel = {
@@ -19,13 +20,20 @@ const statusLabel = {
   upcoming: 'Em dia'
 }
 
-export function BillRow({ bill, onPay, onUndo, onEdit, onDelete }: Props): React.JSX.Element {
+export function BillRow({
+  bill,
+  onPay,
+  onUndo,
+  onEdit,
+  onDelete,
+  canPay
+}: Props): React.JSX.Element {
   const status = billStatus(bill)
   // Apagar pede um segundo clique para confirmar
   const [confirmDelete, setConfirmDelete] = useState(false)
 
   return (
-    <div className={`bill-row status-${status}`}>
+    <div className={`bill-row status-${status} ${canPay && status !== 'paid' ? 'can-pay' : ''}`}>
       <div className="bill-main">
         <p className="bill-name">
           {bill.name}
@@ -33,6 +41,9 @@ export function BillRow({ bill, onPay, onUndo, onEdit, onDelete }: Props): React
             <span className="tag">
               {bill.recurringUntil ? `Fixa até ${formatDate(bill.recurringUntil)}` : 'Fixa'}
             </span>
+          )}
+          {canPay && status !== 'paid' && (
+            <span className="tag tag-can-pay">Já consegue pagar</span>
           )}
         </p>
         <p className="bill-meta">

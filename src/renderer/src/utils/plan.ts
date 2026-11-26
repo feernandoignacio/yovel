@@ -321,3 +321,39 @@ export function payoffDates(
   }
   return result
 }
+
+// Dinheiro disponível agora: tudo que entrou, menos os gastos e as contas já pagas.
+// Metas e investimentos ficam de fora
+export function availableBalance(data: AppData): number {
+  const income = sum(data.entries.filter((e) => e.type === 'income').map((e) => e.amount))
+  const expense = sum(data.entries.filter((e) => e.type === 'expense').map((e) => e.amount))
+  const paid = sum(data.bills.filter((b) => b.paidAt).map((b) => b.amount))
+  return income - expense - paid
+}
+
+/*
+  Contas que o dinheiro disponível já cobre.
+  Usa o dinheiro primeiro nas vencidas (na ordem do plano de quitação) e depois nas
+  contas em dia, da que vence antes para a que vence depois. Para na primeira que não cabe,
+  para não pular a fila.
+*/
+export function affordableBillIds(data: AppData): Set<string> {
+  const today = todayISO()
+  const open = data.bills.filter((b) => !b.paidAt)
+  const overdue = orderForPayoff(
+    open.filter((b) => b.dueDate < today),
+    data.settings.payoffStrategy ?? 'smallest'
+  )
+  const upcoming = open
+    .filter((b) => b.dueDate >= today)
+    .sort((a, b) => a.dueDate.localeCompare(b.dueDate))
+
+  const ids = new Set<string>()
+  let left = availableBalance(data)
+  for (const bill of [...overdue, ...upcoming]) {
+    if (bill.amount > left + 0.001) break
+    left -= bill.amount
+    ids.add(bill.id)
+  }
+  return ids
+}

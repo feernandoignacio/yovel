@@ -204,6 +204,10 @@ button {
   border: 1px solid transparent;
 }
 
+.card-success {
+  border-color: var(--green);
+}
+
 .card-warning {
   border-color: var(--mustard);
 }
@@ -280,6 +284,11 @@ button {
   border-left-color: var(--red);
 }
 
+.bill-row.can-pay {
+  border: 1px solid var(--green);
+  border-left: 4px solid var(--green);
+}
+
 .bill-row.status-paid {
   opacity: 0.65;
 }
@@ -316,6 +325,12 @@ button {
   border: 1px solid var(--stone-light);
   border-radius: 4px;
   padding: 1px 6px;
+}
+
+.tag-can-pay {
+  color: var(--green);
+  background: var(--green-bg);
+  border-color: var(--green);
 }
 
 .pill {

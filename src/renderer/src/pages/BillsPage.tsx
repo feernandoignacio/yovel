@@ -6,6 +6,7 @@ import { BillRow } from '../components/BillRow'
 import { billStatus, byDueDate, getDueSoonDays } from '../utils/bills'
 import { isSameMonth } from '../utils/date'
 import { formatMoney, sum } from '../utils/money'
+import { affordableBillIds, availableBalance } from '../utils/plan'
 
 export function BillsPage(): React.JSX.Element {
   const { data, markBillAsPaid, undoBillPayment, addBill, updateBill, deleteBill } = useData()
@@ -22,6 +23,10 @@ export function BillsPage(): React.JSX.Element {
 
   const dueSoon = open.filter((b) => billStatus(b) === 'dueSoon')
   const openThisMonth = open.filter((b) => isSameMonth(b.dueDate))
+  const balance = availableBalance(data)
+  const affordable = affordableBillIds(data)
+  const coveredOpen = open.filter((b) => affordable.has(b.id)).length
+
   const paidThisMonth = data.bills.filter((b) => b.paidAt && isSameMonth(b.paidAt)).sort(byDueDate)
 
   return (
@@ -38,7 +43,18 @@ export function BillsPage(): React.JSX.Element {
         </button>
       </header>
 
-      <div className="cards">
+      <div className="cards cards-4">
+        <div className={`card ${coveredOpen > 0 ? 'card-success' : ''}`}>
+          <p className="card-label">Disponível agora</p>
+          <p className={`card-value ${balance < 0 ? 'negative' : ''}`}>{formatMoney(balance)}</p>
+          <p className="card-hint">
+            {coveredOpen === 0
+              ? 'Entradas menos gastos e contas pagas'
+              : coveredOpen === 1
+                ? 'Já cobre 1 conta'
+                : `Já cobre ${coveredOpen} contas`}
+          </p>
+        </div>
         <div className="card">
           <p className="card-label">A pagar neste mês</p>
           <p className="card-value">{formatMoney(sum(openThisMonth.map((b) => b.amount)))}</p>
@@ -72,6 +88,7 @@ export function BillsPage(): React.JSX.Element {
             <BillRow
               key={bill.id}
               bill={bill}
+              canPay={affordable.has(bill.id)}
               onPay={() => markBillAsPaid(bill.id)}
               onEdit={() => setForm({ bill })}
               onDelete={() => deleteBill(bill.id)}

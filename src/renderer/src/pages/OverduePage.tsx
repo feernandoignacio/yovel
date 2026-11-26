@@ -5,6 +5,7 @@ import { Bill } from '../types'
 import { BillRow } from '../components/BillRow'
 import { billStatus, byDueDate } from '../utils/bills'
 import { formatMoney, sum } from '../utils/money'
+import { affordableBillIds } from '../utils/plan'
 
 export function OverduePage(): React.JSX.Element {
   const { data, markBillAsPaid, addBill, updateBill, deleteBill } = useData()
@@ -13,6 +14,7 @@ export function OverduePage(): React.JSX.Element {
   // Mais antigas primeiro
   const overdue = data.bills.filter((b) => billStatus(b) === 'overdue').sort(byDueDate)
   const total = sum(overdue.map((b) => b.amount))
+  const affordable = affordableBillIds(data)
 
   return (
     <section className="page">
@@ -42,6 +44,7 @@ export function OverduePage(): React.JSX.Element {
           <BillRow
             key={bill.id}
             bill={bill}
+            canPay={affordable.has(bill.id)}
             onPay={() => markBillAsPaid(bill.id)}
             onEdit={() => setForm({ bill })}
             onDelete={() => deleteBill(bill.id)}
