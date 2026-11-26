@@ -1,6 +1,6 @@
 {
   "name": "yovel",
-  "version": "1.9.5",
+  "version": "1.10.0",
   "description": "Operação Yovel: personal finance desktop app by Rign Studio",
   "main": "./out/main/index.js",
   "author": "Lucas Fernando",
