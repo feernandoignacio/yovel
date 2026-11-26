@@ -18,8 +18,9 @@ export function Select({ value, options, onChange }: Props): React.JSX.Element {
     const close = (event: MouseEvent): void => {
       if (!ref.current?.contains(event.target as Node)) setOpen(false)
     }
-    document.addEventListener('mousedown', close)
-    return () => document.removeEventListener('mousedown', close)
+    // Fase de captura: o formulário (modal) barra o clique antes de chegar no document
+    document.addEventListener('mousedown', close, true)
+    return () => document.removeEventListener('mousedown', close, true)
   }, [open])
 
   const choose = (option: string): void => {
